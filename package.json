@@ -1,0 +1,23 @@
+{
+  "name": "racingar",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/svg94/RacingAR.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/svg94/RacingAR/issues"
+  },
+  "type": "module",
+  "homepage": "https://github.com/svg94/RacingAR#readme",
+  "dependencies": {
+    "three": "^0.146.0"
+  }
+}
