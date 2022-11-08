@@ -57,19 +57,34 @@ export function createScene(renderer: WebGLRenderer) {
   const controller = renderer.xr.getController(0);
   scene.add(controller);
 
+  const boxGeometry = new BoxBufferGeometry(1, 0.1, 1);
+  const boxMaterial = new MeshBasicMaterial({ color: 0xffffff });
+  const box = new Mesh(boxGeometry, boxMaterial);
+
+  const box2Geometry = new BoxBufferGeometry(0.2, 0.05, 0.2);
+  const box2Material = new MeshBasicMaterial({ color: 0x00ff00 });
+  const box2 = new Mesh(boxGeometry, boxMaterial);
+
+  box.position.z = 0;
+
+  let isBoardDisplayed = false;
   controller.addEventListener("select", onSelect);
 
   function onSelect() {
-    if (planeMarker.visible) {
-      const model = koalaModel.clone();
+    if (planeMarker.visible && !isBoardDisplayed) {
+      const model = box.clone();
+      const player = box2.clone();
 
       model.position.setFromMatrixPosition(planeMarker.matrix);
+      player.position.set(model.position.x,model.position.y,0.5);
 
-      // Rotate the model randomly to give a bit of variation to the scene.
-      model.rotation.y = Math.random() * (Math.PI * 2);
+      model.rotation.y = 0;
       model.visible = true;
+      player.visible = true;
 
       scene.add(model);
+      scene.add(player);
+      isBoardDisplayed = true;
     }
   }
   const ambientLight = new AmbientLight(0xffffff, 1.0);
