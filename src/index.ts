@@ -8,8 +8,6 @@ import {
 } from "./utils/domUtils";
 
 import "./styles.css";
-import {isTouchDevice} from "./utils/isTouchDevice";
-import joystick from 'nipplejs';
 
 
 function initializeXRApp() {
@@ -29,13 +27,14 @@ function initializeXRApp() {
   // Create the AR button element, configure our XR session, and append it to the DOM.
   document.body.appendChild(ARButton.createButton(
       renderer,
-      { requiredFeatures: ["hit-test"] },
+      { requiredFeatures: ["hit-test"], optionalFeatures: [ 'dom-overlay', 'dom-overlay-for-handheld-ar' ], domOverlay: { root: document.body }  },
   ));
-  var arButton = ARButton.createButton(renderer, { requiredFeatures: ['hit-test'], optionalFeatures: [ 'dom-overlay', 'dom-overlay-for-handheld-ar' ], domOverlay: { root: document.body } });
-  document.body.appendChild(ARButton.createButton(
-      renderer,
-      { requiredFeatures: ["hit-test"] },
-  ));
+
+  // const node = document.createElement("li");
+  // const textnode = document.createTextNode("Water");
+  // node.appendChild(textnode);
+  // document.body.appendChild(node);
+  // renderer.domElement.appendChild(node);
 
   // Pass the renderer to the createScene-funtion.
   createScene(renderer);
