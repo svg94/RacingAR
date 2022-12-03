@@ -1,56 +1,26 @@
-#joystickWrapper1 {
-  pointer-events: auto;
-  display: block;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  background-color: transparent;
-  width: 120px;
-  height: 120px;
-  z-index: 12;
-  touch-action: manipulation;
-  background-color: rgba(red, 0.2);
+.arrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
 }
 
-#joystickWrapper2 {
-  pointer-events: auto;
-  display: block;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: auto;
-  background-color: transparent;
-  width: 50vw;
-  height: 140px;
-  z-index: 12;
-  touch-action: manipulation;
-  display: none;
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
 
-  #jumpButton {
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: rgba($color: white, $alpha: 0.2);
-    opacity: 1;
-    touch-action: manipulation;
+.left {
+  transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+}
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: auto;
+.up {
+  transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
+}
 
-    p {
-      position: relative;
-      display: inline-block;
-      color: white;
-      opacity: 1;
-      margin: 0;
-      padding: 0;
-      letter-spacing: 4px;
-      margin-left: 4px;
-    }
-  }
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
 }
