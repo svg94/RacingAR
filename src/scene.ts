@@ -2,7 +2,7 @@ import { createPlaneMarker } from "./objects/PlaneMarker";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { handleXRHitTest } from "./utils/hitTest";
 
-import {
+import THREE, {
   AmbientLight,
   BoxBufferGeometry,
   Mesh,
@@ -63,6 +63,15 @@ export function createScene(renderer: WebGLRenderer) {
 
   scene.add(planeMarker);
 
+  //first UI Attempts
+  const UIButton = <HTMLButtonElement>document.getElementById('UIButton');
+  UIButton.onclick = () => {
+    if (player.position.x + 0.025 < board.position.x + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because x-Coordinate is in the middle of the Object)
+      player.position.set(player.position.x + speed, player.position.y, player.position.z)
+    } else {
+    }
+  };
+
 
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
@@ -79,6 +88,7 @@ export function createScene(renderer: WebGLRenderer) {
 
 
       }
+
       renderer.render(scene, camera);
 
     }
@@ -107,9 +117,9 @@ export function createScene(renderer: WebGLRenderer) {
 
   //Move Player Funktion
 
-  let rightButton = true;
+  let rightButton = false;
   let leftButton = false;
-  let downButton = true;
+  let downButton = false;
   let upButton = false;
   let jumpButton = false;
   let crouchButton = false;
