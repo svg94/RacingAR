@@ -14,6 +14,8 @@ import {
   XRFrame,
     AxesHelper
 } from "three";
+import {ARButton} from "three/examples/jsm/webxr/ARButton";
+import * as Console from "console";
 
 export function createScene(renderer: WebGLRenderer) {
   const scene = new Scene()
@@ -59,6 +61,7 @@ export function createScene(renderer: WebGLRenderer) {
 
   scene.add(planeMarker);
 
+
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
 
@@ -96,6 +99,7 @@ export function createScene(renderer: WebGLRenderer) {
         }
       }
       renderer.render(scene, camera);
+
     }
   }
 
@@ -112,8 +116,6 @@ export function createScene(renderer: WebGLRenderer) {
   scene.add(controller);
 
 
-
-
 // Add axes TODO check if that works
   var axes = new AxesHelper(50);
   scene.add( axes );
@@ -122,13 +124,26 @@ export function createScene(renderer: WebGLRenderer) {
   let isBoardDisplayed = false;
   controller.addEventListener("select", onSelect);
 
-  function onSelect() {
-    if (planeMarker.visible && !isBoardDisplayed) {
+  //Move Player Funktion
 
+  let rightButton = true;
+  let leftButton = false;
+  let downButton = true;
+  let upButton = false;
+  let jumpButton = false;
+  let crouchButton = false;
+
+  let speed = 0.01;
+
+  async function onSelect() {
+    if (planeMarker.visible && !isBoardDisplayed) {
 
       board.position.setFromMatrixPosition(planeMarker.matrix);
       const pos= board.position;
       player.position.set(pos.x,pos.y+(board.geometry.parameters.height/2),pos.z);
+
+      // model.position.setFromMatrixPosition(planeMarker.matrix);
+      // player.position.set(model.position.x,model.position.y,0.5);
 
       console.log(board.position);
       console.log(player.position);
@@ -145,7 +160,50 @@ export function createScene(renderer: WebGLRenderer) {
       isBoardDisplayed = true;
       isGameStarted = true;
     }
+
+    if (rightButton == true){
+      if(player.position.x + 0.025 < board.position.x + 0.5){ // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because x-Coordinate is in the middle of the Object)
+        player.position.set(player.position.x + speed,player.position.y,player.position.z)
+      }else{}
+    }
+    if (leftButton == true){
+      if(player.position.x - 0.025 >  board.position.x - 0.5) {
+        player.position.set(player.position.x - speed, player.position.y, player.position.z)
+      }else{}
+    }
+    if (downButton == true){
+      if(player.position.z + 0.025 < board.position.z + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because z-Coordinate is in the middle of the Object)
+        player.position.set(player.position.x,player.position.y,player.position.z + speed)
+      }else {}
+    }
+    if (upButton == true){
+      if(player.position.z - 0.025 > board.position.z - 0.5) {
+      player.position.set(player.position.x,player.position.y,player.position.z - speed)
+      }else {}
+    }
+    if (jumpButton == true){
+      player.position.set(player.position.x,player.position.y + 0.2,player.position.z)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      player.position.set(player.position.x,player.position.y - 0.2,player.position.z)
+
+      /*let i = 0.01;
+      let startPosition = player.position.y;
+      while (player.position.y < player.position.y + 0.2){
+        player.position.set(player.position.x,player.position.y + i,player.position.z)
+      }
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      let d = 0.01;
+      while (player.position.y > startPosition) {
+        player.position.set(player.position.x, player.position.y - d, player.position.z)
+      }*/
+    }
+    /*    if (crouchButton == true){
+            player.position.set(player.position.x,player.position.y - speed/2,player.position.z)
+          }
+     */
+
   }
+
   const ambientLight = new AmbientLight(0xffffff, 1.0);
   scene.add(ambientLight);
 };
