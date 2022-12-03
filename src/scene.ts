@@ -61,15 +61,39 @@ export function createScene(renderer: WebGLRenderer) {
 
   scene.add(planeMarker);
 
-  const UIButton = <HTMLButtonElement>document.getElementById('UIButton');
-  UIButton.onclick = () => {
+  //UIButtons + Move-Functions
+  //Right Button + Move
+  const UIButtonright = <HTMLButtonElement>document.getElementById('UIButtonright');
+  UIButtonright.onclick = () => {
     if (player.position.x + 0.025 < board.position.x + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because x-Coordinate is in the middle of the Object)
       player.position.set(player.position.x + speed, player.position.y, player.position.z)
     } else {
     }
   };
-
-
+  //Left Button + Move
+  const UIButtonleft = <HTMLButtonElement>document.getElementById('UIButtonleft');
+  UIButtonleft.onclick = () => {
+    if (player.position.x - 0.025 > board.position.x - 0.5) {
+      player.position.set(player.position.x - speed, player.position.y, player.position.z)
+    } else {
+    }
+  };
+  //Up Button + Move
+  const UIButtonup = <HTMLButtonElement>document.getElementById('UIButtonup');
+  UIButtonup.onclick = () => {
+    if (player.position.z - 0.025 > board.position.z - 0.5) {
+      player.position.set(player.position.x, player.position.y, player.position.z - speed)
+    } else {
+    }
+  };
+  //Down Button + Move
+  const UIButtondown = <HTMLButtonElement>document.getElementById('UIButtondown');
+  UIButtondown.onclick = () => {
+    if (player.position.z + 0.025 < board.position.z + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because z-Coordinate is in the middle of the Object)
+      player.position.set(player.position.x, player.position.y, player.position.z + speed)
+    } else {
+    }
+  };
 
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
@@ -142,7 +166,6 @@ export function createScene(renderer: WebGLRenderer) {
       board.visible = true;
       player.visible = true;
       planeMarker.visible = false;
-
 
 
       isBoardDisplayed = true;
