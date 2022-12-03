@@ -23,12 +23,14 @@ export function createScene(renderer: WebGLRenderer) {
   let isGameStarted = false;
 
   //object pool for obstacles
-  const NUMBERS_OF_OBSTACLES = 5;
+  const NUMBERS_OF_OBSTACLES = 40;
   let objectPool: any[] = [];
   for(let i=0; i < NUMBERS_OF_OBSTACLES; i++){
     const obstacleGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
     const obstacleMaterial = new MeshBasicMaterial({ color: 0xff0000 });
     const obstacle = new Mesh(obstacleGeometry, obstacleMaterial);
+
+    obstacle.rotation.y = 0;
 
     obstacle.visible = false;
     scene.add(obstacle);
@@ -75,28 +77,7 @@ export function createScene(renderer: WebGLRenderer) {
           planeMarker.visible = false;
         })
 
-        //ObjectPoolLogic
-        if(isGameStarted){
-          let inactiveObjects = objectPool.filter(obj=>!obj.visible);
-          let activeObjects = objectPool.filter(obj=>obj.visible);
 
-          if(inactiveObjects.length > 0){
-            inactiveObjects[0].visible = true;
-            let firstX = board.position.x+board.geometry.parameters.width/2;
-            let firstY = board.position.y+board.geometry.parameters.height/2;
-            let firstZ = board.position.z+board.geometry.parameters.depth/2;
-            inactiveObjects[0].obstacleMesh.position.set(firstX,firstY,firstZ);
-          }
-          if(activeObjects.length > 0){
-            activeObjects.forEach(obj=>{
-              let pos = obj.position;
-              obj.position.set(pos.x,pos.y,pos.z+0.005);
-              if(pos.z > board.position.z-board.geometry.parameters.depth/2){
-                obj.visible = false;
-              }
-            });
-          }
-        }
       }
       renderer.render(scene, camera);
 
@@ -153,57 +134,105 @@ export function createScene(renderer: WebGLRenderer) {
 
       board.visible = true;
       player.visible = true;
-      planeMarker.visible=false;
+      planeMarker.visible = false;
 
 
 
       isBoardDisplayed = true;
       isGameStarted = true;
     }
+    if(isBoardDisplayed) {
+      planeMarker.visible = false;
 
-    if (rightButton == true){
-      if(player.position.x + 0.025 < board.position.x + 0.5){ // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because x-Coordinate is in the middle of the Object)
-        player.position.set(player.position.x + speed,player.position.y,player.position.z)
-      }else{}
-    }
-    if (leftButton == true){
-      if(player.position.x - 0.025 >  board.position.x - 0.5) {
-        player.position.set(player.position.x - speed, player.position.y, player.position.z)
-      }else{}
-    }
-    if (downButton == true){
-      if(player.position.z + 0.025 < board.position.z + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because z-Coordinate is in the middle of the Object)
-        player.position.set(player.position.x,player.position.y,player.position.z + speed)
-      }else {}
-    }
-    if (upButton == true){
-      if(player.position.z - 0.025 > board.position.z - 0.5) {
-      player.position.set(player.position.x,player.position.y,player.position.z - speed)
-      }else {}
-    }
-    if (jumpButton == true){
-      player.position.set(player.position.x,player.position.y + 0.2,player.position.z)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      player.position.set(player.position.x,player.position.y - 0.2,player.position.z)
-
-      /*let i = 0.01;
-      let startPosition = player.position.y;
-      while (player.position.y < player.position.y + 0.2){
-        player.position.set(player.position.x,player.position.y + i,player.position.z)
+      if (rightButton == true) {
+        if (player.position.x + 0.025 < board.position.x + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because x-Coordinate is in the middle of the Object)
+          player.position.set(player.position.x + speed, player.position.y, player.position.z)
+        } else {
+        }
       }
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      let d = 0.01;
-      while (player.position.y > startPosition) {
-        player.position.set(player.position.x, player.position.y - d, player.position.z)
-      }*/
-    }
-    /*    if (crouchButton == true){
-            player.position.set(player.position.x,player.position.y - speed/2,player.position.z)
-          }
-     */
+      if (leftButton == true) {
+        if (player.position.x - 0.025 > board.position.x - 0.5) {
+          player.position.set(player.position.x - speed, player.position.y, player.position.z)
+        } else {
+        }
+      }
+      if (downButton == true) {
+        if (player.position.z + 0.025 < board.position.z + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because z-Coordinate is in the middle of the Object)
+          player.position.set(player.position.x, player.position.y, player.position.z + speed)
+        } else {
+        }
+      }
+      if (upButton == true) {
+        if (player.position.z - 0.025 > board.position.z - 0.5) {
+          player.position.set(player.position.x, player.position.y, player.position.z - speed)
+        } else {
+        }
+      }
+      if (jumpButton == true) {
+        player.position.set(player.position.x, player.position.y + 0.2, player.position.z)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        player.position.set(player.position.x, player.position.y - 0.2, player.position.z)
 
+        /*let i = 0.01;
+        let startPosition = player.position.y;
+        while (player.position.y < player.position.y + 0.2){
+          player.position.set(player.position.x,player.position.y + i,player.position.z)
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        let d = 0.01;
+        while (player.position.y > startPosition) {
+          player.position.set(player.position.x, player.position.y - d, player.position.z)
+        }*/
+      }
+      /*    if (crouchButton == true){
+              player.position.set(player.position.x,player.position.y - speed/2,player.position.z)
+            }
+       */
+
+      //ObjectPoolLogic
+      if (isGameStarted) {
+        let inactiveObjects = objectPool.filter(obj => !obj.visible);
+        let activeObjects = objectPool.filter(obj => obj.visible);
+
+        if (inactiveObjects.length > 0) {
+          let randomElementNumber = randomIntFromInterval(0, inactiveObjects.length);
+
+          let randomFactor = randomIntFromInterval(1, 20) * 5 / 100;
+          let randomX = (board.position.x - board.geometry.parameters.width / 2) + ((board.position.x + board.geometry.parameters.width / 2) * randomFactor) * 2;
+          let firstX = board.position.x + board.geometry.parameters.width / 2;
+          let firstY = board.position.y + board.geometry.parameters.height / 2;
+          let firstZ = board.position.z - board.geometry.parameters.depth / 2;
+          inactiveObjects[randomElementNumber].position.set(randomX, board.position.y + (board.geometry.parameters.height / 2), firstZ);
+
+          inactiveObjects[randomElementNumber].visible = true;
+
+          // inactiveObjects.forEach(obj=>{
+          //   let randomFactor = randomIntFromInterval(1,20) * 5 / 100;
+          //   let randomX = (board.position.x-board.geometry.parameters.width/2) + ((board.position.x+board.geometry.parameters.width/2)*randomFactor)*2;
+          //   let firstX = board.position.x+board.geometry.parameters.width/2;
+          //   let firstY = board.position.y+board.geometry.parameters.height/2;
+          //   let firstZ = board.position.z-board.geometry.parameters.depth/2;
+          //   obj.position.set(randomX,board.position.y+(board.geometry.parameters.height/2),firstZ);
+          //
+          //   obj.visible = true;
+          // });
+        }
+        if (activeObjects.length > 0) {
+          activeObjects.forEach(obj => {
+            let pos = obj.position;
+            obj.position.set(pos.x, pos.y, pos.z + (speed * 10));
+            if (!(pos.z + 0.025 < board.position.z + 0.5)) {
+              obj.visible = false;
+            }
+          });
+        }
+      }
+    }
   }
 
   const ambientLight = new AmbientLight(0xffffff, 1.0);
   scene.add(ambientLight);
 };
+function randomIntFromInterval(min: number, max: number) { // min and max included
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
