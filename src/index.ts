@@ -8,8 +8,6 @@ import {
 } from "./utils/domUtils";
 
 import "./styles.css";
-import {isTouchDevice} from "./utils/isTouchDevice";
-import joystick from 'nipplejs';
 
 
 function initializeXRApp() {
@@ -29,34 +27,14 @@ function initializeXRApp() {
   // Create the AR button element, configure our XR session, and append it to the DOM.
   document.body.appendChild(ARButton.createButton(
       renderer,
-      { requiredFeatures: ["hit-test"] },
+      { requiredFeatures: ["hit-test"], optionalFeatures: [ 'dom-overlay', 'dom-overlay-for-handheld-ar' ], domOverlay: { root: document.body }  },
   ));
-  var arButton = ARButton.createButton(renderer, { requiredFeatures: ['hit-test'], optionalFeatures: [ 'dom-overlay', 'dom-overlay-for-handheld-ar' ], domOverlay: { root: document.body } });
-  document.body.appendChild(ARButton.createButton(
-      renderer,
-      { requiredFeatures: ["hit-test"] },
-  ));
-  // let joystickManager;
-  // // Can be viewed here
-  // if (isTouchDevice()) {
-  //   // Get the area within the UI to use as our joystick
-  //   let touchZone = document.getElementById('joystick-zone');
-  //
-  //   if (touchZone != null) {
-  //     // Create a Joystick Manager
-  //     joystickManager = joystick.create({zone: document.getElementById('joystick-zone')!,})
-  //     // Register what to do when the joystick moves
-  //     joystickManager.on("move", (event, data) => {
-  //       console.log("move",data.vector.x)
-  //       // positionOffset = data.vector.x;
-  //     })
-  //     // When the joystick isn't being interacted with anymore, stop moving the rocket
-  //     joystickManager.on('end', (event, data) => {
-  //       // positionOffset = 0.0;
-  //       console.log("end");
-  //     })
-  //   }
-  // }
+
+  // const node = document.createElement("li");
+  // const textnode = document.createTextNode("Water");
+  // node.appendChild(textnode);
+  // document.body.appendChild(node);
+  // renderer.domElement.appendChild(node);
 
   // Pass the renderer to the createScene-funtion.
   createScene(renderer);
