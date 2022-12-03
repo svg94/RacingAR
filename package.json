@@ -30,6 +30,7 @@
     "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
+    "nipplejs": "^0.10.0",
     "three": "^0.138.3"
   }
 }

@@ -12,10 +12,41 @@ import {
   Scene,
   WebGLRenderer,
   XRFrame,
+    AxesHelper
 } from "three";
 
 export function createScene(renderer: WebGLRenderer) {
   const scene = new Scene()
+
+  let isGameStarted = false;
+
+  //object pool for obstacles
+  const NUMBERS_OF_OBSTACLES = 5;
+  let objectPool: any[] = [];
+  for(let i=0; i < NUMBERS_OF_OBSTACLES; i++){
+    const obstacleGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
+    const obstacleMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+    const obstacle = new Mesh(obstacleGeometry, obstacleMaterial);
+
+    obstacle.visible = false;
+    scene.add(obstacle);
+    objectPool.push(obstacle)
+  }
+
+  //Board
+  const boardGeometry = new BoxBufferGeometry(1, 0.1, 1);
+  const boardMaterial = new MeshBasicMaterial({ color: 0xffffff });
+  const board = new Mesh(boardGeometry, boardMaterial);
+
+  //Player
+  const playerGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
+  const playerMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
+  const player = new Mesh(playerGeometry, playerMaterial);
+
+  board.visible = false;
+  player.visible = false;
+  scene.add(board);
+  scene.add(player);
 
   const camera = new PerspectiveCamera(
       70,
@@ -40,6 +71,29 @@ export function createScene(renderer: WebGLRenderer) {
         }, () => {
           planeMarker.visible = false;
         })
+
+        //ObjectPoolLogic
+        if(isGameStarted){
+          let inactiveObjects = objectPool.filter(obj=>!obj.visible);
+          let activeObjects = objectPool.filter(obj=>obj.visible);
+
+          if(inactiveObjects.length > 0){
+            inactiveObjects[0].visible = true;
+            let firstX = board.position.x+board.geometry.parameters.width/2;
+            let firstY = board.position.y+board.geometry.parameters.height/2;
+            let firstZ = board.position.z+board.geometry.parameters.depth/2;
+            inactiveObjects[0].obstacleMesh.position.set(firstX,firstY,firstZ);
+          }
+          if(activeObjects.length > 0){
+            activeObjects.forEach(obj=>{
+              let pos = obj.position;
+              obj.position.set(pos.x,pos.y,pos.z+0.005);
+              if(pos.z > board.position.z-board.geometry.parameters.depth/2){
+                obj.visible = false;
+              }
+            });
+          }
+        }
       }
       renderer.render(scene, camera);
     }
@@ -57,34 +111,39 @@ export function createScene(renderer: WebGLRenderer) {
   const controller = renderer.xr.getController(0);
   scene.add(controller);
 
-  const boxGeometry = new BoxBufferGeometry(1, 0.1, 1);
-  const boxMaterial = new MeshBasicMaterial({ color: 0xffffff });
-  const box = new Mesh(boxGeometry, boxMaterial);
 
-  const box2Geometry = new BoxBufferGeometry(0.2, 0.05, 0.2);
-  const box2Material = new MeshBasicMaterial({ color: 0x00ff00 });
-  const box2 = new Mesh(boxGeometry, boxMaterial);
 
-  box.position.z = 0;
+
+// Add axes TODO check if that works
+  var axes = new AxesHelper(50);
+  scene.add( axes );
+
 
   let isBoardDisplayed = false;
   controller.addEventListener("select", onSelect);
 
   function onSelect() {
     if (planeMarker.visible && !isBoardDisplayed) {
-      const model = box.clone();
-      const player = box2.clone();
 
-      model.position.setFromMatrixPosition(planeMarker.matrix);
-      player.position.set(model.position.x,model.position.y,0.5);
 
-      model.rotation.y = 0;
-      model.visible = true;
+      board.position.setFromMatrixPosition(planeMarker.matrix);
+      const pos= board.position;
+      player.position.set(pos.x,pos.y+(board.geometry.parameters.height/2),pos.z);
+
+      console.log(board.position);
+      console.log(player.position);
+
+      board.rotation.y = 0;
+      player.rotation.y = 0;
+
+      board.visible = true;
       player.visible = true;
+      planeMarker.visible=false;
 
-      scene.add(model);
-      scene.add(player);
+
+
       isBoardDisplayed = true;
+      isGameStarted = true;
     }
   }
   const ambientLight = new AmbientLight(0xffffff, 1.0);
