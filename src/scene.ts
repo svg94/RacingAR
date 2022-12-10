@@ -202,11 +202,19 @@ export function createScene(renderer: WebGLRenderer) {
         let activeObjects = objectPool.filter(obj => obj.visible);
 
         if (inactiveObjects.length > 0) {
-          let randomElementNumber = randomIntFromInterval(0, inactiveObjects.length);
+          let randomElementNumber = randomIntFromInterval(0, inactiveObjects.length-1);
 
           let randomFactor = randomIntFromInterval(1, 20) * 5 / 100;
-          let randomX = (board.position.x - board.geometry.parameters.width / 2) + ((board.position.x + board.geometry.parameters.width / 2) * randomFactor) * 2;
-          let firstX = board.position.x + board.geometry.parameters.width / 2;
+          let ganzlinks = board.position.x - board.geometry.parameters.width / 2;
+          let ganzrechts = board.position.x + board.geometry.parameters.width / 2;
+          let fuenferStep = inactiveObjects[randomElementNumber].geometry.parameters.width / board.position.x + board.geometry.parameters.width / 2;
+          let spalten = [];
+          for(let i = ganzlinks; i < ganzrechts; i+fuenferStep){
+            spalten.push(i);
+          }
+          let randomZahl = randomIntFromInterval(0, spalten.length-1);
+          let randomX = spalten[randomZahl];
+          //let firstX = board.position.x + board.geometry.parameters.width / 2;
           let firstY = board.position.y + board.geometry.parameters.height / 2;
           let firstZ = board.position.z - board.geometry.parameters.depth / 2;
           inactiveObjects[randomElementNumber].position.set(randomX, board.position.y + (board.geometry.parameters.height / 2), firstZ);
