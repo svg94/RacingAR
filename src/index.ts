@@ -44,13 +44,14 @@ function initializeXRApp() {
 };
 
 async function start() {
-  // Check if browser supports WebXR with "immersive-ar".
-  const immersiveArSupported = await browserHasImmersiveArCompatibility();
-
-  // Initialize app if supported.
-  immersiveArSupported ?
-      initializeXRApp() :
-      displayUnsupportedBrowserMessage();
+  // // Check if browser supports WebXR with "immersive-ar".
+  // const immersiveArSupported = await browserHasImmersiveArCompatibility();
+  //
+  // // Initialize app if supported.
+  // immersiveArSupported ?
+  //     initializeXRApp() :
+  //     displayUnsupportedBrowserMessage();
+  initializeXRApp();
 };
 
 start();

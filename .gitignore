@@ -4,3 +4,8 @@ stats.json
 yarn-error.log
 ./.vscode
 ./.vercel
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/RacingAR.iml
+/.idea/vcs.xml

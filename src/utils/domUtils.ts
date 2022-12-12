@@ -57,14 +57,16 @@ export function displayIntroductionMessage() {
   const appRoot: HTMLElement | null = document.getElementById("app-root");
 
   const bigMessage: HTMLParagraphElement = document.createElement("h1");
-  bigMessage.innerText = "Welcome! 👋";
+  // bigMessage.innerText = "Welcome! 👋";
+  bigMessage.innerText = "";
 
   const middleMessage: HTMLParagraphElement = document.createElement("p");
-  middleMessage.innerText = "Press the button below to enter the AR experience.";
+  // middleMessage.innerText = "Press the button below to enter the AR experience.";
+  middleMessage.innerText = "";
 
   const helpMessage: HTMLParagraphElement = document.createElement("p");
-  helpMessage.innerText =
-    "Note: The app works best in a well lit environment, with enough space to move around.";
+  helpMessage.innerText = "";
+    // "Note: The app works best in a well lit environment, with enough space to move around.";
 
   helpMessage.style.fontSize = "16px";
   helpMessage.style.fontWeight = "bold";
