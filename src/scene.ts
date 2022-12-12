@@ -1,5 +1,4 @@
 import { createPlaneMarker } from "./objects/PlaneMarker";
-import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { handleXRHitTest } from "./utils/hitTest";
 
 import {
@@ -7,7 +6,6 @@ import {
   BoxBufferGeometry,
   Mesh,
   MeshBasicMaterial,
-  Object3D,
   PerspectiveCamera,
   Scene,
   WebGLRenderer,
@@ -95,16 +93,6 @@ export function createScene(renderer: WebGLRenderer) {
 
   scene.add(planeMarker);
 
-  // const UIButton = <HTMLButtonElement>document.getElementById('UIButton');
-  // UIButton.onclick = () => {
-  //   if (player.position.x + 0.025 < board.position.x + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because x-Coordinate is in the middle of the Object)
-  //     player.position.set(player.position.x + speed, player.position.y, player.position.z)
-  //   } else {
-  //   }
-  // };
-
-
-
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
 
@@ -139,14 +127,6 @@ export function createScene(renderer: WebGLRenderer) {
   let isBoardDisplayed = false;
   controller.addEventListener("select", onSelect);
 
-  //Move Player Funktion
-
-  let rightButton = false;
-  let leftButton = false;
-  let downButton = false;
-  let upButton = false;
-  let jumpButton = false;
-  let crouchButton = false;
 
   let speed = 0.01;
 
@@ -180,35 +160,6 @@ export function createScene(renderer: WebGLRenderer) {
     if(isBoardDisplayed) {
       planeMarker.visible = false;
 
-      if (rightButton == true) {
-        if (player.position.x + 0.025 < board.position.x + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because x-Coordinate is in the middle of the Object)
-          player.position.set(player.position.x + speed, player.position.y, player.position.z)
-        } else {
-        }
-      }
-      if (leftButton == true) {
-        if (player.position.x - 0.025 > board.position.x - 0.5) {
-          player.position.set(player.position.x - speed, player.position.y, player.position.z)
-        } else {
-        }
-      }
-      if (downButton == true) {
-        if (player.position.z + 0.025 < board.position.z + 0.5) { // 0.5 = (length of model/2 ) , 0.025 = length of Player/2 (because z-Coordinate is in the middle of the Object)
-          player.position.set(player.position.x, player.position.y, player.position.z + speed)
-        } else {
-        }
-      }
-      if (upButton == true) {
-        if (player.position.z - 0.025 > board.position.z - 0.5) {
-          player.position.set(player.position.x, player.position.y, player.position.z - speed)
-        } else {
-        }
-      }
-      if (jumpButton == true) {
-        player.position.set(player.position.x, player.position.y + 0.2, player.position.z)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        player.position.set(player.position.x, player.position.y - 0.2, player.position.z)
-
         /*let i = 0.01;
         let startPosition = player.position.y;
         while (player.position.y < player.position.y + 0.2){
@@ -225,8 +176,6 @@ export function createScene(renderer: WebGLRenderer) {
             }
        */
 
-
-    }
   }
 
   const ambientLight = new AmbientLight(0xffffff, 1.0);
@@ -288,53 +237,40 @@ export function createScene(renderer: WebGLRenderer) {
   function updatePlayer(){
     // move the player
     const speed = 0.05;
-    if (fwdValue > 0) {
-      if (player.position.z - 0.025 > board.position.z - 0.5) {
-        tempVector
-            .set(0, 0, -fwdValue*speed)
-            // .applyAxisAngle(upVector, angle)
-        player.position.addScaledVector(
-            tempVector,
-            1
-        )
-      }
+    if ((fwdValue > 0) && (player.position.z - 0.025 > board.position.z - 0.5)) {
+      tempVector
+          .set(0, 0, -fwdValue*speed)
+      player.position.addScaledVector(
+          tempVector,
+          1
+      )
     }
 
-    if (bkdValue > 0) {
-      if (player.position.z + 0.025 < board.position.z + 0.5) {
-        tempVector
-            .set(0, 0, bkdValue*speed)
-            // .applyAxisAngle(upVector, angle)
-        player.position.addScaledVector(
-            tempVector,
-            1
-        )
-      }
+    if ((bkdValue > 0) && (player.position.z + 0.025 < board.position.z + 0.5)) {
+      tempVector
+          .set(0, 0, bkdValue * speed)
+      player.position.addScaledVector(
+          tempVector,
+          1
+      )
     }
 
-    if (lftValue > 0) {
-      if(player.position.x - 0.025 > board.position.x - 0.5){
-        tempVector
-            .set(-lftValue*speed, 0, 0)
-            // .applyAxisAngle(upVector, angle)
-        player.position.addScaledVector(
-            tempVector,
-            1
-        )
-      }
+    if ((lftValue > 0) && (player.position.x - 0.025 > board.position.x - 0.5)) {
+      tempVector
+          .set(-lftValue * speed, 0, 0)
+      player.position.addScaledVector(
+          tempVector,
+          1
+      )
     }
 
-    if (rgtValue > 0) {
-      console.log(rgtValue);
-      if(player.position.x + 0.025 < board.position.x + 0.5){
-        tempVector
-            .set(rgtValue*speed, 0, 0)
-            // .applyAxisAngle(upVector, angle)
-        player.position.addScaledVector(
-            tempVector,
-            1
-        )
-      }
+    if ((rgtValue > 0) && (player.position.x + 0.025 < board.position.x + 0.5)) {
+      tempVector
+          .set(rgtValue * speed, 0, 0)
+      player.position.addScaledVector(
+          tempVector,
+          1
+      )
     }
 
     player.updateMatrixWorld()
@@ -347,16 +283,6 @@ export function createScene(renderer: WebGLRenderer) {
 
 
   };
-
-  //Renders the scene
-  function animate() {
-
-    updatePlayer();
-    renderer.render( scene, camera );
-    controls.update();
-
-    requestAnimationFrame( animate );
-  }
 
   function addJoystick(){
     const options = {
