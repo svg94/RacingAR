@@ -49,9 +49,10 @@ module.exports = {
     clean: true,
   },
   devServer: {
-    allowedHosts: [".loca.lt"],
+    host: '',
     open: false,
     port: 8080,
+    https: true,
     client: {
       webSocketURL: "ws://0.0.0.0/ws",
     },
