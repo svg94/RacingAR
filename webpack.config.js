@@ -49,16 +49,19 @@ module.exports = {
     clean: true,
   },
   devServer: {
-    host: '',
+    host: '192.168.178.26',
     open: false,
     port: 8080,
-    https: true,
+    https: {
+      key: "./certs/client-key.pem",
+      cert: "./certs/client-cert.pem"
+    },
     client: {
-      webSocketURL: "ws://0.0.0.0/ws",
+      webSocketURL: "wss://0.0.0.0/wss",
     },
     proxy: {
-      "/ws": {
-        target: "http://localhost:443",
+      "/wss": {
+        target: "https://192.168.178.26:443",
         changeOrigin: true,
         secure: true,
       },

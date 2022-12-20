@@ -9,3 +9,4 @@ yarn-error.log
 /.idea/modules.xml
 /.idea/RacingAR.iml
 /.idea/vcs.xml
+/certs/
