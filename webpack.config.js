@@ -56,12 +56,9 @@ module.exports = {
       key: "./certs/client-key.pem",
       cert: "./certs/client-cert.pem"
     },
-    client: {
-      webSocketURL: "wss://0.0.0.0/wss",
-    },
     proxy: {
-      "/wss": {
-        target: "https://192.168.178.26:443",
+      "/socket.io": {
+        target: "https://192.168.178.26:3001",
         changeOrigin: true,
         secure: true,
       },
