@@ -49,20 +49,13 @@ module.exports = {
     clean: true,
   },
   devServer: {
-    host: '192.168.178.26',
+    host: '192.168.178.49',
     open: false,
     port: 8080,
     https: {
       key: "./certs/client-key.pem",
       cert: "./certs/client-cert.pem"
-    },
-    proxy: {
-      "/socket.io": {
-        target: "https://192.168.178.26:3001",
-        changeOrigin: true,
-        secure: true,
-      },
-    },
+    }
   },
   optimization: {
     minimize: true,

@@ -12,15 +12,12 @@ import {
   XRFrame,
   AxesHelper, Vector3
 } from "three";
-
 import {
   OrbitControls
 } from "three/examples/jsm/controls/OrbitControls.js";
 import nipplejs from 'nipplejs';
 
 import { io } from "socket.io-client";
-//TODO FIX fs cannot be found. Oder lies den scheiß einfach als string variable ein
-import * as fs from 'fs';
 
 export function createScene(renderer: WebGLRenderer) {
   const scene = new Scene()
@@ -91,78 +88,10 @@ export function createScene(renderer: WebGLRenderer) {
   controls.maxAzimuthAngle = Math.PI/4 // radians
 
 
-  //Socker Connection
-  // @ts-ignore
-  const socket = io("https://192.168.178.26:3001/", {
-    key: "-----BEGIN RSA PRIVATE KEY-----\n" +
-        "MIIEowIBAAKCAQEAwtvc0aRYS0JfgANiujE92iYcwy+P0iAvLgJLOjwDnjLcqZiJ\n" +
-        "AWGYi6ydRYT8+WgfCwjOejY6rXHOig9fa7MtPpbHOQg9nNnqv+e/h/07mDhKo9W1\n" +
-        "ji/6IJSEmMpV2V9ZZ2zvzv8GBUx4+KZKBSaoVHqHvWAQ4ZAyoBWBgbmSXDt1Q7WZ\n" +
-        "cMSR7E0n+8VudghFv6mEWgMBx1wAjQtdYL9KCQ+njZXaicBFFtRCxG9DF0IgP0Aj\n" +
-        "y7a28qa+nKmch8nM8aqe7WcGv+ta9wrKnkki9Te/898BiBcTRtD8dWw5F8ajMFnG\n" +
-        "0TB2IE4HjxuRNyLT+98L4OLoN1DQ54Fk7mNHJwIDAQABAoIBAFY+FTe8M0/r6nSw\n" +
-        "Cuw5ixSYNba1wEPR9s+4OC9oDHniLQPq/Qhdd7SqC1mPiJ+iU8sAdNJmWgYWDsHQ\n" +
-        "F/2E6gt/lGFLomlfkaSqH31CuTOgBnkIxzhNR7lPwngVZXW1284IywKkoLeLpyb2\n" +
-        "AmDRQUNSj+1jLVWICsALhKwzw/GJoZ//UqXmkPS4X1Y3X025KQpONER+E4TUX8mV\n" +
-        "/vgbrl3p9DyxCp/OFcuBh1vNIcpcY2iYjOcwPDn+H8AkY+IvdbPciel2gkfJapZN\n" +
-        "mZYj6ghBh2CYtAiRX+BnRhdQwyPidTHbtZEDhNjN3UL9IOFGXeTiVi2/cUN96PPX\n" +
-        "OHlncMECgYEA4ZDqp5XtjaA+Cna7j6nY2yfaIhw5JKRv5gk71mgoiuTHCGZSEW8+\n" +
-        "oVi+kNCzyV8o8thyrJuHef4JRbu0P8LPAV+czq6pzDjguA92oSibCD52myFmlebX\n" +
-        "yr76IUdisPl6LuAEIVjnWthPnsu18YDOjAVhyQGKXsPAS1r9G9Bt95cCgYEA3SZQ\n" +
-        "R1SSXMpckdaHhJ+8DpSRojjTTqm6VqdqahedTw7jH8Y5HMgsZ2nJfGK4g3wicklp\n" +
-        "xjLgCnhc7D8p0o2PR+Dmsx67tn3Ug3O67PhgWQ67x/BRgsuLo88AA+EIpSY+0V6t\n" +
-        "YSbwEtLDhe8HMHyG8sP8e+dc7Fg6yMkl73oinvECgYBi+spdW4bwPL68rLlFI0zL\n" +
-        "bkNj8GqKz7Vihe7B+NbBi/5iizO7/srG1kBZH5uk46L+XUiEwYLDX1wGQ4Wm7P8V\n" +
-        "JTWT5EUSHmtNmUt/EGhnR7GYBSIU6UUL7J2p+L8v1WluJFLrpy1uSbk2f0GJhfIc\n" +
-        "s0fjgk+Loe5Bot2qVN3MZQKBgDe374IJTNcUJT6ZToubs0X5KLg2mQa4vLoYdDdG\n" +
-        "u9uvZIoc50bZKFbl0F4GgXafUA57cKr/JnN83+yl/WOPRwpVH8sBc0oHagO0pOQP\n" +
-        "sDa//4/gfKj3n7cl8FsJ16PEfw9BS22u4c3cTGbyUl1lApsnxfVx1Xe2wxjTlTtB\n" +
-        "CngBAoGBAMrrsN/cnskH+/berWAesxJM4Ry/VAYs+ZxIikaqgYBwHXTd9EZdogkM\n" +
-        "M2R1dCLA8cIlH9OsTT2kMTMNsgmEdrnq45qnmoEcEG6LB8kSAaMNoODr7nTceNYg\n" +
-        "pu1FLD+tRYVCKduBzCUMNBdPjSgmSriuCXbTdguEaCHtqPm53xsi\n" +
-        "-----END RSA PRIVATE KEY-----",
-    cert: "-----BEGIN CERTIFICATE-----\n" +
-        "MIIDATCCAekCFC8m9+CKRBxGdrPOpV1A7ukFWaGWMA0GCSqGSIb3DQEBCwUAMD0x\n" +
-        "CzAJBgNVBAYTAkRFMQwwCgYDVQQIDANOUlcxEDAOBgNVBAcMB0NvbG9nbmUxDjAM\n" +
-        "BgNVBAMMBUJvamFuMB4XDTIxMDIyNjEwMTYzNloXDTIxMDMyODEwMTYzNlowPTEL\n" +
-        "MAkGA1UEBhMCREUxDDAKBgNVBAgMA05SVzEQMA4GA1UEBwwHQ29sb2duZTEOMAwG\n" +
-        "A1UEAwwFQm9qYW4wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDC29zR\n" +
-        "pFhLQl+AA2K6MT3aJhzDL4/SIC8uAks6PAOeMtypmIkBYZiLrJ1FhPz5aB8LCM56\n" +
-        "Njqtcc6KD19rsy0+lsc5CD2c2eq/57+H/TuYOEqj1bWOL/oglISYylXZX1lnbO/O\n" +
-        "/wYFTHj4pkoFJqhUeoe9YBDhkDKgFYGBuZJcO3VDtZlwxJHsTSf7xW52CEW/qYRa\n" +
-        "AwHHXACNC11gv0oJD6eNldqJwEUW1ELEb0MXQiA/QCPLtrbypr6cqZyHyczxqp7t\n" +
-        "Zwa/61r3CsqeSSL1N7/z3wGIFxNG0Px1bDkXxqMwWcbRMHYgTgePG5E3ItP73wvg\n" +
-        "4ug3UNDngWTuY0cnAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAACsRby+DsdGqPfy\n" +
-        "u+NTy0FSgc3DX6kIFAQTpwyg4W2FGMpnbqcvtWBagGaQSPqt5GbmFnYqnD/CPckb\n" +
-        "ama6+MsjelAcA3XAvtL3kv33ySxoA2AWSL+JSvLcoP1YrLaWV7GnACTwgm3Md14L\n" +
-        "11tKGwCBBl79HWAFTVNfiHkRXGx9p5Li5A/tLWD5gltAmP3JvS5VDQJWMd9Jbz4T\n" +
-        "M1wmBsyULOmZjmDOCGgyiJxJrgJ5EOJOarcE7jdpM3rHIoDnZl+SWfk2UmFGG4iX\n" +
-        "6fCgTad5DvWXE8asDGrFgQLupJcmrLTKxbgbs6lvJ3FNUL4THBUzGij1UTy5mibv\n" +
-        "KAIfNAQ=\n" +
-        "-----END CERTIFICATE-----",
-    ca: [
-      "-----BEGIN CERTIFICATE-----\n" +
-      "MIIDATCCAekCFC8m9+CKRBxGdrPOpV1A7ukFWaGWMA0GCSqGSIb3DQEBCwUAMD0x\n" +
-      "CzAJBgNVBAYTAkRFMQwwCgYDVQQIDANOUlcxEDAOBgNVBAcMB0NvbG9nbmUxDjAM\n" +
-      "BgNVBAMMBUJvamFuMB4XDTIxMDIyNjEwMTYzNloXDTIxMDMyODEwMTYzNlowPTEL\n" +
-      "MAkGA1UEBhMCREUxDDAKBgNVBAgMA05SVzEQMA4GA1UEBwwHQ29sb2duZTEOMAwG\n" +
-      "A1UEAwwFQm9qYW4wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDC29zR\n" +
-      "pFhLQl+AA2K6MT3aJhzDL4/SIC8uAks6PAOeMtypmIkBYZiLrJ1FhPz5aB8LCM56\n" +
-      "Njqtcc6KD19rsy0+lsc5CD2c2eq/57+H/TuYOEqj1bWOL/oglISYylXZX1lnbO/O\n" +
-      "/wYFTHj4pkoFJqhUeoe9YBDhkDKgFYGBuZJcO3VDtZlwxJHsTSf7xW52CEW/qYRa\n" +
-      "AwHHXACNC11gv0oJD6eNldqJwEUW1ELEb0MXQiA/QCPLtrbypr6cqZyHyczxqp7t\n" +
-      "Zwa/61r3CsqeSSL1N7/z3wGIFxNG0Px1bDkXxqMwWcbRMHYgTgePG5E3ItP73wvg\n" +
-      "4ug3UNDngWTuY0cnAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAACsRby+DsdGqPfy\n" +
-      "u+NTy0FSgc3DX6kIFAQTpwyg4W2FGMpnbqcvtWBagGaQSPqt5GbmFnYqnD/CPckb\n" +
-      "ama6+MsjelAcA3XAvtL3kv33ySxoA2AWSL+JSvLcoP1YrLaWV7GnACTwgm3Md14L\n" +
-      "11tKGwCBBl79HWAFTVNfiHkRXGx9p5Li5A/tLWD5gltAmP3JvS5VDQJWMd9Jbz4T\n" +
-      "M1wmBsyULOmZjmDOCGgyiJxJrgJ5EOJOarcE7jdpM3rHIoDnZl+SWfk2UmFGG4iX\n" +
-      "6fCgTad5DvWXE8asDGrFgQLupJcmrLTKxbgbs6lvJ3FNUL4THBUzGij1UTy5mibv\n" +
-      "KAIfNAQ=\n" +
-      "-----END CERTIFICATE-----"
-    ],
-    secure:true,
-    rejectUnauthorized : false
+  //Socket Connection
+  //@ts-ignore
+  const socket = io("https://192.168.178.49:3001/",{
+    transports: ["websocket"] //Damit unterbindet man die cors errors die durch socket ios initiale http requests entstehen. Cool oder :') . I'm crying.
   });
 
   socket.emit("connection",{});
