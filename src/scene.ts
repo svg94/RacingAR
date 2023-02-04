@@ -253,23 +253,23 @@ export function createScene(renderer: WebGLRenderer) {
         // });
       }
       if (activeObjects.length > 0) {
+        //let i = 0;
         activeObjects.forEach(obj => {
-          let i = 0;
           let pos = obj.position;
           obj.position.set(pos.x, pos.y, pos.z + (speed * 10));
 
           //Update BoundingBox of Obstacle
           //console.log(obj);
 
-          objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
+          //objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
           //console.log(objectBBPool.at(i));
 
           //Check for Collision
 
-          if(objectBBPool.at(i).intersectsBox(playerBB)){ //obstacle.obstacleBB
+          /*if(objectBBPool.at(i).intersectsBox(playerBB)){ //obstacle.obstacleBB
             console.log(obj);
           }else{}
-          i++;
+          i++;*/
 
 
           if (!(pos.z + 0.025 < board.position.z + 0.5)) {
@@ -326,6 +326,20 @@ export function createScene(renderer: WebGLRenderer) {
     if (player.geometry.boundingBox instanceof Box3) {
       playerBB.copy(player.geometry.boundingBox).applyMatrix4(player.matrixWorld);
     }
+
+    //Check for Collision
+    let activeObjects = objectPool.filter(obj => obj.visible);
+    let i = 0;
+    activeObjects.forEach(obj => {
+      //Update BoundingBox of Obstacle
+      objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
+
+      //Check for Collision
+      if(objectBBPool.at(i).intersectsBox(playerBB)){ //obstacle.obstacleBB
+        console.log(obj); // TODO hier dann Aufruf fürs Spielende einfügen
+      }else{}
+      i++;
+    });
     //console.log(playerBB);
 
     //controls.target.set( mesh.position.x, mesh.position.y, mesh.position.z );
