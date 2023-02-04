@@ -10,7 +10,7 @@ import {
   Scene,
   WebGLRenderer,
   XRFrame,
-  AxesHelper, Vector3
+  AxesHelper, Vector3, Box3
 } from "three";
 import {
   OrbitControls
@@ -19,24 +19,41 @@ import nipplejs from 'nipplejs';
 
 import { io } from "socket.io-client";
 
+class ObstacleClass {
+  public obstacleMesh: Mesh;
+  public obstacleBB: Box3;
+
+  public constructor(obstacleMesh: Mesh,obstacleBB: Box3 ) {
+    this.obstacleMesh = obstacleMesh;
+    this.obstacleBB = obstacleBB;
+  }
+}
+
 export function createScene(renderer: WebGLRenderer) {
   const scene = new Scene()
 
   let isGameStarted = false;
 
-  //object pool for obstacles
+  //object pool for obstaclesMesh
   const NUMBERS_OF_OBSTACLES = 40;
   let objectPool: any[] = [];
+  let objectBBPool: any[] = [];
   for(let i=0; i < NUMBERS_OF_OBSTACLES; i++){
     const obstacleGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
     const obstacleMaterial = new MeshBasicMaterial({ color: 0xff0000 });
-    const obstacle = new Mesh(obstacleGeometry, obstacleMaterial);
+    const obstacleMesh = new Mesh(obstacleGeometry, obstacleMaterial);
+    const obstacleBB = new Box3(new Vector3(), new Vector3());
+    obstacleBB.setFromObject(obstacleMesh);
+    //const obstacle = new ObstacleClass(obstacleMesh,obstacleBB);
 
-    obstacle.rotation.y = 0;
+    obstacleMesh.rotation.y = 0;
 
-    obstacle.visible = false;
-    scene.add(obstacle);
-    objectPool.push(obstacle)
+    obstacleMesh.visible = false;
+    scene.add(obstacleMesh);
+    //console.log(obstacleMesh);
+    //console.log(obstacleBB);
+    objectPool.push(obstacleMesh)
+    objectBBPool.push(obstacleBB)
   }
 
   //Board
@@ -48,6 +65,12 @@ export function createScene(renderer: WebGLRenderer) {
   const playerGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
   const playerMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
   const player = new Mesh(playerGeometry, playerMaterial);
+
+  console.log("Hallo Test");
+  //BoundingBox of player
+  const playerBB = new Box3(new Vector3(), new Vector3()); //oen Vector for min and one for max
+  playerBB.setFromObject(player);
+  //console.log(playerBB);
 
   board.visible = false;
   player.visible = false;
@@ -90,7 +113,7 @@ export function createScene(renderer: WebGLRenderer) {
 
   //Socket Connection
   //@ts-ignore
-  const socket = io("https://192.168.178.49:3001/",{
+  const socket = io("https://192.168.2.43:3001/",{
     transports: ["websocket"] //Damit unterbindet man die cors errors die durch socket ios initiale http requests entstehen. Cool oder :') . I'm crying.
   });
 
@@ -147,8 +170,8 @@ export function createScene(renderer: WebGLRenderer) {
       // model.position.setFromMatrixPosition(planeMarker.matrix);
       // player.position.set(model.position.x,model.position.y,0.5);
 
-      console.log(board.position);
-      console.log(player.position);
+      //console.log(board.position);
+      //console.log(player.position);
 
       board.rotation.y = 0;
       player.rotation.y = 0;
@@ -231,13 +254,30 @@ export function createScene(renderer: WebGLRenderer) {
       }
       if (activeObjects.length > 0) {
         activeObjects.forEach(obj => {
+          let i = 0;
           let pos = obj.position;
           obj.position.set(pos.x, pos.y, pos.z + (speed * 10));
+
+          //Update BoundingBox of Obstacle
+          //console.log(obj);
+
+          objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
+          //console.log(objectBBPool.at(i));
+
+          //Check for Collision
+
+          if(objectBBPool.at(i).intersectsBox(playerBB)){ //obstacle.obstacleBB
+            console.log(obj);
+          }else{}
+          i++;
+
+
           if (!(pos.z + 0.025 < board.position.z + 0.5)) {
             obj.visible = false;
           }
         });
       }
+
     }
   }
 
@@ -282,6 +322,12 @@ export function createScene(renderer: WebGLRenderer) {
 
     player.updateMatrixWorld()
 
+    //Update BoundingBox of Player
+    if (player.geometry.boundingBox instanceof Box3) {
+      playerBB.copy(player.geometry.boundingBox).applyMatrix4(player.matrixWorld);
+    }
+    //console.log(playerBB);
+
     //controls.target.set( mesh.position.x, mesh.position.y, mesh.position.z );
     // reposition camera
     camera.position.sub(controls.target)
@@ -290,6 +336,7 @@ export function createScene(renderer: WebGLRenderer) {
 
 
   };
+
 
   function addJoystick(){
     const options = {
