@@ -18,16 +18,8 @@ import {
 import nipplejs from 'nipplejs';
 
 import { io } from "socket.io-client";
+import {Obstacle} from "./interfaces/IObstacle";
 
-class ObstacleClass {
-  public obstacleMesh: Mesh;
-  public obstacleBB: Box3;
-
-  public constructor(obstacleMesh: Mesh,obstacleBB: Box3 ) {
-    this.obstacleMesh = obstacleMesh;
-    this.obstacleBB = obstacleBB;
-  }
-}
 
 export function createScene(renderer: WebGLRenderer) {
   const scene = new Scene()
@@ -36,8 +28,8 @@ export function createScene(renderer: WebGLRenderer) {
 
   //object pool for obstaclesMesh
   const NUMBERS_OF_OBSTACLES = 40;
-  let objectPool: any[] = [];
-  let objectBBPool: any[] = [];
+  let objectPool: Obstacle[] = [];
+  //let objectBBPool: any[] = [];
   for(let i=0; i < NUMBERS_OF_OBSTACLES; i++){
     const obstacleGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
     const obstacleMaterial = new MeshBasicMaterial({ color: 0xff0000 });
@@ -52,8 +44,11 @@ export function createScene(renderer: WebGLRenderer) {
     scene.add(obstacleMesh);
     //console.log(obstacleMesh);
     //console.log(obstacleBB);
-    objectPool.push(obstacleMesh)
-    objectBBPool.push(obstacleBB)
+    objectPool.push({
+      obstacleMesh: obstacleMesh,
+      obstacleBB: obstacleBB
+    })
+    //objectBBPool.push(obstacleBB)
   }
 
   //Board
@@ -217,8 +212,8 @@ export function createScene(renderer: WebGLRenderer) {
   function moveObstacles(){
     //ObjectPoolLogic
     if (isGameStarted) {
-      let inactiveObjects = objectPool.filter(obj => !obj.visible);
-      let activeObjects = objectPool.filter(obj => obj.visible);
+      let inactiveObjects = objectPool.filter(obj => !obj.obstacleMesh.visible);
+      let activeObjects = objectPool.filter(obj => obj.obstacleMesh.visible);
 
       if (inactiveObjects.length > 0) {
         let randomElementNumber = randomIntFromInterval(0, inactiveObjects.length-1);
@@ -237,9 +232,9 @@ export function createScene(renderer: WebGLRenderer) {
         // //let firstX = board.position.x + board.geometry.parameters.width / 2;
         // let firstY = board.position.y + board.geometry.parameters.height / 2;
         let firstZ = board.position.z - board.geometry.parameters.depth / 2;
-        inactiveObjects[randomElementNumber].position.set(randomX, board.position.y + (board.geometry.parameters.height / 2), firstZ);
+        inactiveObjects[randomElementNumber].obstacleMesh.position.set(randomX, board.position.y + (board.geometry.parameters.height / 2), firstZ);
 
-        inactiveObjects[randomElementNumber].visible = true;
+        inactiveObjects[randomElementNumber].obstacleMesh.visible = true;
 
         // inactiveObjects.forEach(obj=>{
         //   let randomFactor = randomIntFromInterval(1,20) * 5 / 100;
@@ -255,8 +250,8 @@ export function createScene(renderer: WebGLRenderer) {
       if (activeObjects.length > 0) {
         //let i = 0;
         activeObjects.forEach(obj => {
-          let pos = obj.position;
-          obj.position.set(pos.x, pos.y, pos.z + (speed * 10));
+          let pos = obj.obstacleMesh.position;
+          obj.obstacleMesh.position.set(pos.x, pos.y, pos.z + (speed * 10));
 
           //Update BoundingBox of Obstacle
           //console.log(obj);
@@ -273,7 +268,7 @@ export function createScene(renderer: WebGLRenderer) {
 
 
           if (!(pos.z + 0.025 < board.position.z + 0.5)) {
-            obj.visible = false;
+            obj.obstacleMesh.visible = false;
           }
         });
       }
@@ -328,17 +323,20 @@ export function createScene(renderer: WebGLRenderer) {
     }
 
     //Check for Collision
-    let activeObjects = objectPool.filter(obj => obj.visible);
-    let i = 0;
+    let activeObjects = objectPool.filter(obj => obj.obstacleMesh.visible);
+    // let i = 0;
     activeObjects.forEach(obj => {
       //Update BoundingBox of Obstacle
-      objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
+      if (obj.obstacleMesh.geometry.boundingBox instanceof Box3) {
+        obj.obstacleBB.copy(obj.obstacleMesh.geometry.boundingBox).applyMatrix4(obj.obstacleMesh.matrixWorld);
+      }
+      // objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
 
       //Check for Collision
-      if(objectBBPool.at(i).intersectsBox(playerBB)){ //obstacle.obstacleBB
+      if(obj.obstacleBB.intersectsBox(playerBB)){ //obstacle.obstacleBB
         console.log(obj); // TODO hier dann Aufruf fürs Spielende einfügen
       }else{}
-      i++;
+      // i++;
     });
     //console.log(playerBB);
 
