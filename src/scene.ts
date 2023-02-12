@@ -48,6 +48,7 @@ export function createScene(renderer: WebGLRenderer) {
   const playerGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
   const playerMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
   const player = new Mesh(playerGeometry, playerMaterial);
+  let playerName = "Player1";
 
   board.visible = false;
   player.visible = false;
@@ -88,13 +89,34 @@ export function createScene(renderer: WebGLRenderer) {
   controls.maxAzimuthAngle = Math.PI/4 // radians
 
 
+  let enemyPlayers: any[] = [];
   //Socket Connection
   //@ts-ignore
   const socket = io("https://192.168.178.49:3001/",{
     transports: ["websocket"] //Damit unterbindet man die cors errors die durch socket ios initiale http requests entstehen. Cool oder :') . I'm crying.
   });
 
-  socket.emit("connection",{});
+  // Frag nach allen Spielern, die schon da sind
+  socket.emit("joined");
+
+  // Sag, dass ich joine
+  socket.emit("join",{"name":playerName,"lobbyID":"lobbyID123"});
+
+  // Gib alle, die schon in der Lobby sind
+  socket.on("joined",(enemies)=>{
+    enemies.forEach((enemy: any)=>{
+      enemyPlayers.push(enemy);
+    })
+  });
+
+  // Gib jeden, der grad joined
+  socket.on("join",(enemy)=>{
+    enemyPlayers.push(enemy);
+  });
+  // Lösch jeden, der grad disconnected
+  socket.on("disconnectedPlayer",(enemyData)=>{
+    enemyPlayers = enemyPlayers.filter(enemy => enemy.socketId !== enemyData.id);
+  });
 
   const planeMarker = createPlaneMarker();
 
