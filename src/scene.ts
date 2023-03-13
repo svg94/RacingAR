@@ -48,7 +48,10 @@ export function createScene(renderer: WebGLRenderer) {
   const playerGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
   const playerMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
   const player = new Mesh(playerGeometry, playerMaterial);
-  let playerName = "Player1";
+  // @ts-ignore
+  let playerName: string;
+  // @ts-ignore
+  let lobbyName;
 
   board.visible = false;
   player.visible = false;
@@ -92,31 +95,93 @@ export function createScene(renderer: WebGLRenderer) {
   let enemyPlayers: any[] = [];
   //Socket Connection
   //@ts-ignore
-  const socket = io("https://192.168.178.49:3001/",{
+  let socket = io("https://192.168.178.49:3001/",{
     transports: ["websocket"] //Damit unterbindet man die cors errors die durch socket ios initiale http requests entstehen. Cool oder :') . I'm crying.
   });
+  // @ts-ignore
+  document.getElementById('socketIOButton').addEventListener('click',initiateSocketConnection);
+  let connectedSocket = false;
+  function initiateSocketConnection(){
+    if(connectedSocket){
+      return;
+    }
+    connectedSocket = true;
+    // // @ts-ignore
+    // playerName = document.getElementById('playerName').innerText;
+    // // @ts-ignore
+    // lobbyName = document.getElementById('lobbyName').innerText;
+    playerName = "Player"+Math.floor(Math.random() * 100);
+    lobbyName = "Lobby123"
+    // Frag nach allen Spielern, die schon da sind
+    socket.emit("joined");
 
-  // Frag nach allen Spielern, die schon da sind
-  socket.emit("joined");
+    // Sag, dass ich joine
+    socket.emit("join",{"name":playerName,"lobbyID":lobbyName});
 
-  // Sag, dass ich joine
-  socket.emit("join",{"name":playerName,"lobbyID":"lobbyID123"});
+    // Gib alle, die schon in der Lobby sind
+    socket.on("joined",(enemies)=>{
+      console.log("EVENT JOINED", enemies);
+      enemies.forEach((enemy: any)=>{
+        if(enemy.name === playerName){
+          console.log("Eigener Player");
+          return;
+        }
+        //Create Enemy
+        const enemyGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
+        const enemyMaterial = new MeshBasicMaterial({ color: 0xffa500 });
+        const enemyObject = new Mesh(enemyGeometry, enemyMaterial);
 
-  // Gib alle, die schon in der Lobby sind
-  socket.on("joined",(enemies)=>{
-    enemies.forEach((enemy: any)=>{
+        enemyObject.rotation.y = 0;
+        enemyObject.visible = true;
+        scene.add(enemyObject);
+
+        const pos= board.position;
+        enemyObject.position.set(pos.x,pos.y+(board.geometry.parameters.height/2),pos.z);
+
+        enemy.enemyObject = enemyObject
+        enemyPlayers.push(enemy);
+      })
+    });
+
+    // Gib jeden, der grad joined
+    socket.on("join",(enemy)=>{
+      if(enemy.name === playerName){
+        return;
+      }
+      console.log("EVENT JOIN", enemy);
+      //Create Enemy
+      const enemyGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
+      const enemyMaterial = new MeshBasicMaterial({ color: 0xffa500 });
+      const enemyObject = new Mesh(enemyGeometry, enemyMaterial);
+
+      enemyObject.rotation.y = 0;
+      enemyObject.visible = true;
+      scene.add(enemyObject);
+
+      const pos= board.position;
+      enemyObject.position.set(pos.x,pos.y+(board.geometry.parameters.height/2),pos.z);
+
+      enemy.enemyObject = enemyObject
       enemyPlayers.push(enemy);
-    })
-  });
+    });
+    // Lösch jeden, der grad disconnected
+    socket.on("disconnectedPlayer",(enemyData)=>{
+      enemyPlayers = enemyPlayers.filter(enemy => enemy.socketId !== enemyData.id);
+    });
 
-  // Gib jeden, der grad joined
-  socket.on("join",(enemy)=>{
-    enemyPlayers.push(enemy);
-  });
-  // Lösch jeden, der grad disconnected
-  socket.on("disconnectedPlayer",(enemyData)=>{
-    enemyPlayers = enemyPlayers.filter(enemy => enemy.socketId !== enemyData.id);
-  });
+    socket.on("updatedPlayers",(enemyData)=>{
+      enemyPlayers = enemyPlayers.filter(enemy => enemy.socketId !== enemyData.id);
+    });
+
+    // socket.on('init', handleInit);
+    // socket.on('gameState', handleGameState);
+    // socket.on('gameOver', handleGameOver);
+    // socket.on('gameCode', handleGameCode);
+    // socket.on('unknownCode', handleUnknownCode);
+    // socket.on('tooManyPlayers', handleTooManyPlayers);
+  }
+
+
 
   const planeMarker = createPlaneMarker();
 
@@ -303,6 +368,7 @@ export function createScene(renderer: WebGLRenderer) {
     }
 
     player.updateMatrixWorld()
+    socket.emit('updatedPlayers')
 
     //controls.target.set( mesh.position.x, mesh.position.y, mesh.position.z );
     // reposition camera
