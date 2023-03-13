@@ -11,11 +11,23 @@
   <body>
   
     <!-- Container for XR DOM Overlay elements -->
+    <div id="GameName">
+      <h1 id = "Texts"></h1>
+    </div>
+
     <div id="xr-ui-container"></div>
+
+    <div id="roomCreation">
+      <button type="button" onclick="alert('Hello world!')">Create New Room</button>
+      <p>OR</p>
+      <input type="text" id="gamecode" placeholder="Enter Game Code" name="gamecode">
+      <button type="button" onclick="alert('Hello world!')">Join Room</button>
+    </div>
+
 
     <div id="app-root"></div>
 
-    <div style="margin-top: 100px">
+    <div style="margin-bottom: 100px">
 
       <div id="mobileInterface" class="noSelect">
         <div id="joystickWrapper1"></div>
@@ -24,7 +36,6 @@
 <!--            <p>JUMP</p>-->
 <!--          </div>-->
         </div>
-        <p>Text value:</p>
       </div>
     </div>
 

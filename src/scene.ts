@@ -19,11 +19,14 @@ import nipplejs from 'nipplejs';
 
 import { io } from "socket.io-client";
 import {Obstacle} from "./interfaces/IObstacle";
-
+import {removeHomescreenUI} from "./utils/domUtils";
+//import {removeHomescreenUI} from "./utils/domUtils";
+export let UILever = "Homescreen";
 
 export function createScene(renderer: WebGLRenderer) {
-  const scene = new Scene()
 
+  UILever = "Game";
+  const scene = new Scene()
   let isGameStarted = false;
 
   //object pool for obstaclesMesh
@@ -123,7 +126,7 @@ export function createScene(renderer: WebGLRenderer) {
 
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
-
+      removeHomescreenUI();
       if (frame) {
         handleXRHitTest(renderer, frame, (hitPoseTransformed: Float32Array) => {
           if (hitPoseTransformed) {
@@ -218,6 +221,7 @@ export function createScene(renderer: WebGLRenderer) {
 
   //animate();
   addJoystick();
+
 
   function moveObstacles(){
     //ObjectPoolLogic

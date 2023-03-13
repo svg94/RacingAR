@@ -2,6 +2,10 @@
  * Returns true if navigator has xr with 'immersive-ar' capabilities
  * Returns false otherwise.
  */
+import {ARButton} from "three/examples/jsm/webxr/ARButton";
+
+import { UILever } from "../scene";
+
 export async function browserHasImmersiveArCompatibility(): Promise<boolean> {
   if (window.navigator.xr) {
     const isSupported: boolean = await navigator.xr.isSessionSupported(
@@ -49,6 +53,24 @@ export function displayUnsupportedBrowserMessage(): void {
   }
 }
 
+
+export function removeHomescreenUI(){
+  const Text: HTMLElement | null = document.getElementById("Texts");
+  const roomCreation: HTMLElement | null = document.getElementById("roomCreation");
+  if (Text){
+    Text.innerText = "";
+  }
+  roomCreation?.remove();
+}
+
+export function displayHomescreenUI(){
+  const Text: HTMLElement | null = document.getElementById("Texts");
+  if (Text){
+      Text.innerText = "RacingAR2.0";
+  }
+}
+
+
 /**
  * Create and show a simple introduction message if the device supports
  * WebXR with immersive-ar mode.
@@ -57,11 +79,11 @@ export function displayIntroductionMessage() {
   const appRoot: HTMLElement | null = document.getElementById("app-root");
 
   const bigMessage: HTMLParagraphElement = document.createElement("h1");
-  // bigMessage.innerText = "Welcome! 👋";
+  bigMessage.innerText = "Welcome! 👋";
   bigMessage.innerText = "";
 
   const middleMessage: HTMLParagraphElement = document.createElement("p");
-  // middleMessage.innerText = "Press the button below to enter the AR experience.";
+  middleMessage.innerText = "Press the button below to enter the AR experience.";
   middleMessage.innerText = "";
 
   const helpMessage: HTMLParagraphElement = document.createElement("p");
