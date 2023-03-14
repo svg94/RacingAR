@@ -4,7 +4,7 @@
  */
 import {ARButton} from "three/examples/jsm/webxr/ARButton";
 
-import { UILever } from "../scene";
+//import { UILever } from "../scene";
 
 export async function browserHasImmersiveArCompatibility(): Promise<boolean> {
   if (window.navigator.xr) {
@@ -53,21 +53,42 @@ export function displayUnsupportedBrowserMessage(): void {
   }
 }
 
+export function GameOver(){
+  // @ts-ignore
+  document.getElementById("BackHome").click();
+  // @ts-ignore
+  document.getElementById("Texts").style.visibility = 'hidden';
+  // @ts-ignore
+  document.getElementById("LastSave").style.visibility = 'hidden';
+  // @ts-ignore
+  document.getElementById("BackHome").style.visibility = 'visible';
+
+
+
+}
 
 export function removeHomescreenUI(){
   const Text: HTMLElement | null = document.getElementById("Texts");
-  const roomCreation: HTMLElement | null = document.getElementById("roomCreation");
   if (Text){
     Text.innerText = "";
   }
-  roomCreation?.remove();
+  // @ts-ignore
+  document.getElementById("roomCreation").style.visibility = 'hidden';
+  // @ts-ignore
+  document.getElementById("LastSave").style.visibility = 'hidden';
+  // @ts-ignore
+  document.getElementById("BackHome").style.visibility = 'visible';
+
 }
+
 
 export function displayHomescreenUI(){
   const Text: HTMLElement | null = document.getElementById("Texts");
   if (Text){
       Text.innerText = "RacingAR2.0";
   }
+  // @ts-ignore
+  document.getElementById("BackHome").style.visibility = 'hidden';
 }
 
 

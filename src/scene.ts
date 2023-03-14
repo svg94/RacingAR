@@ -19,13 +19,13 @@ import nipplejs from 'nipplejs';
 
 import { io } from "socket.io-client";
 import {Obstacle} from "./interfaces/IObstacle";
-import {removeHomescreenUI} from "./utils/domUtils";
+import {displayHomescreenUI, removeHomescreenUI} from "./utils/domUtils";
 //import {removeHomescreenUI} from "./utils/domUtils";
-export let UILever = "Homescreen";
+//export let UILever = "Homescreen";
 
 export function createScene(renderer: WebGLRenderer) {
 
-  UILever = "Game";
+  //UILever = "Game";
   const scene = new Scene()
   let isGameStarted = false;
 
@@ -127,6 +127,7 @@ export function createScene(renderer: WebGLRenderer) {
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
       removeHomescreenUI();
+      console.log('AR-Modus');
       if (frame) {
         handleXRHitTest(renderer, frame, (hitPoseTransformed: Float32Array) => {
           if (hitPoseTransformed) {
@@ -143,10 +144,24 @@ export function createScene(renderer: WebGLRenderer) {
       checkCollision();
       renderer.render(scene, camera);
       controls.update();
+    }else{
+
     }
   }
 
   renderer.setAnimationLoop(renderLoop);
+
+  /*/End AR-Mode
+  let session = renderer.xr.getSession();
+
+  async function shutdownXR(session: { end: () => any; }) {
+    if (session) {
+      await session.end();
+
+      // At this point, WebXR is fully shut down
+    }
+  }*/
+
 
 
   const controller = renderer.xr.getController(0);
