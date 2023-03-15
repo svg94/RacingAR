@@ -3,8 +3,7 @@
  * Returns false otherwise.
  */
 import {ARButton} from "three/examples/jsm/webxr/ARButton";
-
-//import { UILever } from "../scene";
+import {mysocket} from './socket';
 
 export async function browserHasImmersiveArCompatibility(): Promise<boolean> {
   if (window.navigator.xr) {
@@ -123,7 +122,6 @@ export function removeHomescreenUI(){
   }
 }
 
-
 export function displayHomescreenUI(){
   const Text: HTMLElement | null = document.getElementById("Texts");
   if (Text){
@@ -132,6 +130,7 @@ export function displayHomescreenUI(){
   // @ts-ignore
   document.getElementById('NewGamecodeButton').onclick = function() {
     //TODO DO Stuff in Backend to Get Gamecode
+    mysocket.emit("connected");
     let CodeBackend = "Gamecode XY";
     const gameCode: HTMLElement | null = document.getElementById("Gamecode");
     if (gameCode){

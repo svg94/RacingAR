@@ -43,6 +43,7 @@ function initializeXRApp() {
 
 };
 
+import { io } from "socket.io-client";
 async function start() {
 
   // // Check if browser supports WebXR with "immersive-ar".

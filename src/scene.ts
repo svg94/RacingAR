@@ -1,5 +1,7 @@
 import { createPlaneMarker } from "./objects/PlaneMarker";
 import { handleXRHitTest } from "./utils/hitTest";
+import {mysocket} from './utils/socket';
+
 
 import {
   AmbientLight,
@@ -17,7 +19,6 @@ import {
 } from "three/examples/jsm/controls/OrbitControls.js";
 import nipplejs from 'nipplejs';
 
-import { io } from "socket.io-client";
 import {Obstacle} from "./interfaces/IObstacle";
 import {
   addGameOverScreenLoser,
@@ -125,18 +126,14 @@ export function createScene(renderer: WebGLRenderer) {
   let enemyPlayers: any[] = [];
   //Socket Connection
   //@ts-ignore
-  let socket = io("https://192.168.178.49:3001/",{
-  //const socket = io("https://192.168.2.43:3001/",{ //Daniel IP
-    transports: ["websocket"] //Damit unterbindet man die cors errors die durch socket ios initiale http requests entstehen. Cool oder :') . I'm crying.
-  });
+  //let socket = io("https://192.168.178.49:3001/",{ // Bojan IP
+
   // @ts-ignore
-  document.getElementById('socketIOButton').addEventListener('click',initiateSocketConnection);
+  document.getElementById('NewGamecodeButton').addEventListener('click',initiateSocketConnection);
   let connectedSocket = false;
   function initiateSocketConnection(){
-    if(connectedSocket){
-      return;
-    }
     connectedSocket = true;
+
     // // @ts-ignore
     // playerName = document.getElementById('playerName').innerText;
     // // @ts-ignore
@@ -144,13 +141,13 @@ export function createScene(renderer: WebGLRenderer) {
     playerName = "Player"+Math.floor(Math.random() * 100);
     lobbyName = "Lobby123"
     // Frag nach allen Spielern, die schon da sind
-    socket.emit("joined");
+    mysocket.emit("joined");
 
     // Sag, dass ich joine
-    socket.emit("join",{"name":playerName,"lobbyID":lobbyName});
+    mysocket.emit("join",{"name":playerName,"lobbyID":lobbyName});
 
     // Gib alle, die schon in der Lobby sind
-    socket.on("joined",(enemies)=>{
+    mysocket.on("joined",(enemies: any[])=>{
       console.log("EVENT JOINED", enemies);
       enemies.forEach((enemy: any)=>{
         if(enemy.name === playerName){
@@ -175,7 +172,7 @@ export function createScene(renderer: WebGLRenderer) {
     });
 
     // Gib jeden, der grad joined
-    socket.on("join",(enemy)=>{
+    mysocket.on("join",(enemy: any)=>{
       if(enemy.name === playerName){
         return;
       }
@@ -196,11 +193,11 @@ export function createScene(renderer: WebGLRenderer) {
       enemyPlayers.push(enemy);
     });
     // Lösch jeden, der grad disconnected
-    socket.on("disconnectedPlayer",(enemyData)=>{
+    mysocket.on("disconnectedPlayer",(enemyData: any )=>{
       enemyPlayers = enemyPlayers.filter(enemy => enemy.socketId !== enemyData.id);
     });
 
-    socket.on("updatedPlayers",(enemyData)=>{
+    mysocket.on("updatedPlayers",(enemyData: any)=>{
       enemyPlayers = enemyPlayers.filter(enemy => enemy.socketId !== enemyData.id);
     });
 
@@ -418,7 +415,7 @@ export function createScene(renderer: WebGLRenderer) {
     }
 
     player.updateMatrixWorld()
-    socket.emit('updatedPlayers')
+    mysocket.emit('updatedPlayers')
 
     //Update BoundingBox of Player
     if (player.geometry.boundingBox instanceof Box3) {
