@@ -2,13 +2,12 @@ import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
 import { ARButton } from "three/examples/jsm/webxr/ARButton";
 import { createScene } from "./scene";
 import {
-  browserHasImmersiveArCompatibility,
+  browserHasImmersiveArCompatibility, displayHomescreenUI,
   displayIntroductionMessage,
   displayUnsupportedBrowserMessage,
 } from "./utils/domUtils";
 
 import "./styles.css";
-
 
 function initializeXRApp() {
   const { devicePixelRatio, innerHeight, innerWidth } = window;
@@ -36,14 +35,16 @@ function initializeXRApp() {
   // document.body.appendChild(node);
   // renderer.domElement.appendChild(node);
 
+  // Display a welcome message to the user.
+  displayIntroductionMessage();
+  displayHomescreenUI();
   // Pass the renderer to the createScene-funtion.
   createScene(renderer);
 
-  // Display a welcome message to the user.
-  displayIntroductionMessage();
 };
 
 async function start() {
+
   // // Check if browser supports WebXR with "immersive-ar".
   // const immersiveArSupported = await browserHasImmersiveArCompatibility();
   //
@@ -52,6 +53,7 @@ async function start() {
   //     initializeXRApp() :
   //     displayUnsupportedBrowserMessage();
   initializeXRApp();
+
 };
 
 start();

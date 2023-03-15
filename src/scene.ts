@@ -10,7 +10,7 @@ import {
   Scene,
   WebGLRenderer,
   XRFrame,
-  AxesHelper, Vector3
+  AxesHelper, Vector3, Box3
 } from "three";
 import {
   OrbitControls
@@ -18,26 +18,50 @@ import {
 import nipplejs from 'nipplejs';
 
 import { io } from "socket.io-client";
+import {Obstacle} from "./interfaces/IObstacle";
+import {
+  addGameOverScreenLoser,
+  addGameOverScreenWinner,
+  displayHomescreenUI,
+  removeHomescreenUI
+} from "./utils/domUtils";
+//import {removeHomescreenUI} from "./utils/domUtils";
+//export let UILever = "Homescreen";
 
 export function createScene(renderer: WebGLRenderer) {
+
+  //UILever = "Game";
   const scene = new Scene()
-
   let isGameStarted = false;
+  let LostGame = false;
 
-  //object pool for obstacles
+  //object pool for obstaclesMesh
   const NUMBERS_OF_OBSTACLES = 40;
-  let objectPool: any[] = [];
+  let objectPool: Obstacle[] = [];
+  //let objectBBPool: any[] = [];
   for(let i=0; i < NUMBERS_OF_OBSTACLES; i++){
     const obstacleGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
     const obstacleMaterial = new MeshBasicMaterial({ color: 0xff0000 });
-    const obstacle = new Mesh(obstacleGeometry, obstacleMaterial);
+    const obstacleMesh = new Mesh(obstacleGeometry, obstacleMaterial);
+    const obstacleBB = new Box3(new Vector3(), new Vector3());
+    obstacleBB.setFromObject(obstacleMesh);
+    //const obstacle = new ObstacleClass(obstacleMesh,obstacleBB);
 
-    obstacle.rotation.y = 0;
+    obstacleMesh.rotation.y = 0;
 
-    obstacle.visible = false;
-    scene.add(obstacle);
-    objectPool.push(obstacle)
+    obstacleMesh.visible = false;
+    scene.add(obstacleMesh);
+    //console.log(obstacleMesh);
+    //console.log(obstacleBB);
+    objectPool.push({
+      obstacleMesh: obstacleMesh,
+      obstacleBB: obstacleBB
+    })
+    //objectBBPool.push(obstacleBB)
   }
+
+  //Variabel für Mögliche X Positions der Hindernisse
+  let possibleObstacleXPosition :any = [];
 
   //Board
   const boardGeometry = new BoxBufferGeometry(1, 0.1, 1);
@@ -52,6 +76,12 @@ export function createScene(renderer: WebGLRenderer) {
   let playerName: string;
   // @ts-ignore
   let lobbyName;
+
+  console.log("Hallo Test");
+  //BoundingBox of player
+  const playerBB = new Box3(new Vector3(), new Vector3()); //ein Vector for min and one for max
+  playerBB.setFromObject(player);
+  //console.log(playerBB);
 
   board.visible = false;
   player.visible = false;
@@ -96,6 +126,7 @@ export function createScene(renderer: WebGLRenderer) {
   //Socket Connection
   //@ts-ignore
   let socket = io("https://192.168.178.49:3001/",{
+  //const socket = io("https://192.168.2.43:3001/",{ //Daniel IP
     transports: ["websocket"] //Damit unterbindet man die cors errors die durch socket ios initiale http requests entstehen. Cool oder :') . I'm crying.
   });
   // @ts-ignore
@@ -189,7 +220,8 @@ export function createScene(renderer: WebGLRenderer) {
 
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
-
+      removeHomescreenUI();
+      //console.log('AR-Modus');
       if (frame) {
         handleXRHitTest(renderer, frame, (hitPoseTransformed: Float32Array) => {
           if (hitPoseTransformed) {
@@ -203,12 +235,27 @@ export function createScene(renderer: WebGLRenderer) {
 
       }
       updatePlayer();
+      checkCollision();
       renderer.render(scene, camera);
       controls.update();
+    }else{
+
     }
   }
 
   renderer.setAnimationLoop(renderLoop);
+
+  /*/End AR-Mode
+  let session = renderer.xr.getSession();
+
+  async function shutdownXR(session: { end: () => any; }) {
+    if (session) {
+      await session.end();
+
+      // At this point, WebXR is fully shut down
+    }
+  }*/
+
 
 
   const controller = renderer.xr.getController(0);
@@ -234,8 +281,8 @@ export function createScene(renderer: WebGLRenderer) {
       // model.position.setFromMatrixPosition(planeMarker.matrix);
       // player.position.set(model.position.x,model.position.y,0.5);
 
-      console.log(board.position);
-      console.log(player.position);
+      //console.log(board.position);
+      //console.log(player.position);
 
       board.rotation.y = 0;
       player.rotation.y = 0;
@@ -243,17 +290,9 @@ export function createScene(renderer: WebGLRenderer) {
       board.visible = true;
       player.visible = true;
       planeMarker.visible = false;
-
-
-
       isBoardDisplayed = true;
-      isGameStarted = true;
-
-      setInterval(moveObstacles,1000);
-    }
-    if(isBoardDisplayed) {
-      planeMarker.visible = false;
-
+      if(isBoardDisplayed == true) {
+        scene.remove(planeMarker);
         /*let i = 0.01;
         let startPosition = player.position.y;
         while (player.position.y < player.position.y + 0.2){
@@ -265,6 +304,21 @@ export function createScene(renderer: WebGLRenderer) {
           player.position.set(player.position.x, player.position.y - d, player.position.z)
         }*/
       }
+
+      //Bestimmt die möglichen X-Koordinaten für die Hindernisse
+
+      let loopX = (board.position.x-board.geometry.parameters.width/2);
+      while (loopX < (board.position.x-board.geometry.parameters.width/2)+1){ //1 für die Länge des Spielbretts
+        possibleObstacleXPosition.push(loopX);
+        loopX = loopX + 0.05; // 0.05 für die Breite der Hindernisse
+      }
+
+      isBoardDisplayed = true;
+      isGameStarted = true;
+
+      setInterval(moveObstacles,1000);
+    }
+
       /*    if (crouchButton == true){
               player.position.set(player.position.x,player.position.y - speed/2,player.position.z)
             }
@@ -278,53 +332,49 @@ export function createScene(renderer: WebGLRenderer) {
   //animate();
   addJoystick();
 
+
   function moveObstacles(){
     //ObjectPoolLogic
     if (isGameStarted) {
-      let inactiveObjects = objectPool.filter(obj => !obj.visible);
-      let activeObjects = objectPool.filter(obj => obj.visible);
+      let inactiveObjects = objectPool.filter(obj => !obj.obstacleMesh.visible);
+      let activeObjects = objectPool.filter(obj => obj.obstacleMesh.visible);
+
 
       if (inactiveObjects.length > 0) {
         let randomElementNumber = randomIntFromInterval(0, inactiveObjects.length-1);
-
-        let randomFactor = randomIntFromInterval(1, 20) * 5 / 100;
-        // let ganzlinks = board.position.x - board.geometry.parameters.width / 2;
-        // let ganzrechts = board.position.x + board.geometry.parameters.width / 2;
-        // let fuenferStep = inactiveObjects[randomElementNumber].geometry.parameters.width / board.position.x + board.geometry.parameters.width / 2;
-        // let spalten = [];
-        // for(let i = ganzlinks; i < ganzrechts; i+fuenferStep){
-        //   spalten.push(i);
-        // }
-        // let randomZahl = randomIntFromInterval(0, spalten.length-1);
-        // let randomX = spalten[randomZahl];
-        let randomX = (board.position.x-board.geometry.parameters.width/2) + ((board.position.x+board.geometry.parameters.width/2)*randomFactor)*2;
-        // //let firstX = board.position.x + board.geometry.parameters.width / 2;
-        // let firstY = board.position.y + board.geometry.parameters.height / 2;
         let firstZ = board.position.z - board.geometry.parameters.depth / 2;
-        inactiveObjects[randomElementNumber].position.set(randomX, board.position.y + (board.geometry.parameters.height / 2), firstZ);
 
-        inactiveObjects[randomElementNumber].visible = true;
+        inactiveObjects[randomElementNumber].obstacleMesh.position.set(possibleObstacleXPosition[Math.floor(Math.random()*possibleObstacleXPosition.length)], board.position.y + (board.geometry.parameters.height / 2), firstZ);
 
-        // inactiveObjects.forEach(obj=>{
-        //   let randomFactor = randomIntFromInterval(1,20) * 5 / 100;
-        //   let randomX = (board.position.x-board.geometry.parameters.width/2) + ((board.position.x+board.geometry.parameters.width/2)*randomFactor)*2;
-        //   let firstX = board.position.x+board.geometry.parameters.width/2;
-        //   let firstY = board.position.y+board.geometry.parameters.height/2;
-        //   let firstZ = board.position.z-board.geometry.parameters.depth/2;
-        //   obj.position.set(randomX,board.position.y+(board.geometry.parameters.height/2),firstZ);
-        //
-        //   obj.visible = true;
-        // });
+        inactiveObjects[randomElementNumber].obstacleMesh.visible = true;
+
       }
       if (activeObjects.length > 0) {
+        //let i = 0;
         activeObjects.forEach(obj => {
-          let pos = obj.position;
-          obj.position.set(pos.x, pos.y, pos.z + (speed * 10));
+          let pos = obj.obstacleMesh.position;
+          obj.obstacleMesh.position.set(pos.x, pos.y, pos.z + (speed * 10));
+
+          //Update BoundingBox of Obstacle
+          //console.log(obj);
+
+          //objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
+          //console.log(objectBBPool.at(i));
+
+          //Check for Collision
+
+          /*if(objectBBPool.at(i).intersectsBox(playerBB)){ //obstacle.obstacleBB
+            console.log(obj);
+          }else{}
+          i++;*/
+
+
           if (!(pos.z + 0.025 < board.position.z + 0.5)) {
-            obj.visible = false;
+            obj.obstacleMesh.visible = false;
           }
         });
       }
+
     }
   }
 
@@ -370,6 +420,11 @@ export function createScene(renderer: WebGLRenderer) {
     player.updateMatrixWorld()
     socket.emit('updatedPlayers')
 
+    //Update BoundingBox of Player
+    if (player.geometry.boundingBox instanceof Box3) {
+      playerBB.copy(player.geometry.boundingBox).applyMatrix4(player.matrixWorld);
+    }
+
     //controls.target.set( mesh.position.x, mesh.position.y, mesh.position.z );
     // reposition camera
     camera.position.sub(controls.target)
@@ -378,6 +433,37 @@ export function createScene(renderer: WebGLRenderer) {
 
 
   };
+
+  function checkCollision(){
+    //Check for Collision
+    let activeObjects = objectPool.filter(obj => obj.obstacleMesh.visible);
+    // let i = 0;
+    activeObjects.forEach(obj => {
+      //Update BoundingBox of Obstacle
+      if (obj.obstacleMesh.geometry.boundingBox instanceof Box3) {
+        obj.obstacleBB.copy(obj.obstacleMesh.geometry.boundingBox).applyMatrix4(obj.obstacleMesh.matrixWorld);
+      }
+      // objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
+
+      //Check for Collision
+      if(obj.obstacleBB.intersectsBox(playerBB)){ //obstacle.obstacleBB
+        isGameStarted = false;
+        LostGame = true;
+        //addGameOverScreenLoser();
+        addGameOverScreenWinner();
+      }else{
+        if(isGameStarted == false){
+          if(LostGame == true){
+            //addGameOverScreenLoser();
+            addGameOverScreenWinner();
+          }else{
+            addGameOverScreenWinner();
+          }
+        }
+      }
+      // i++;
+    });
+  }
 
   function addJoystick(){
     const options = {
