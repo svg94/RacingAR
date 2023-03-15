@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-    <title>WebXR App</title>
+    <title>RacingAR</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
@@ -11,25 +11,52 @@
   <body>
   
     <!-- Container for XR DOM Overlay elements -->
-    <div id="GameName">
-      <h1 id = "Texts"></h1>
+    <div id = "HomescreenUI">
+
+      <div id="GameName">
+        <h1 id = "Texts"></h1>
+      </div>
+
+      <div id="xr-ui-container"></div>
+
+      <div id="roomCreation">
+        <button type="button" id="NewGamecodeButton">Create New Room</button>
+        <em id="Gamecode"></em>
+        <p>OR</p>
+        <form name = "JoinRoomForm">
+          <input type="text" name="Entergamecode" placeholder="Enter Game Code">
+          <input type="submit" id ="JoinRoomButton" value="Join Room">
+        </form>
+      </div>
+
+      <button type="button" id="LastSave" onclick="alert('Hello world!')">Load Last Save</button>
+
     </div>
 
     <input type="button" id="BackHome" onclick="location.href='https://192.168.2.43:8080/';" value="HOME" />
 
-    <div id="xr-ui-container"></div>
+    <style>
+      #GameOverScreenUI {
+        background-color: #EBEBEB;
+        padding:0;
+        margin:0;
+        top:0;
+        left:0;
 
-    <div id="roomCreation">
-      <button type="button" onclick="alert('Hello world!')">Create New Room</button>
-      <p>OR</p>
-      <input type="text" id="gamecode" placeholder="Enter Game Code" name="gamecode">
-      <button type="button" onclick="alert('Hello world!')">Join Room</button>
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <div id="GameOverScreenUI">
+      <h1>Game Over</h1>
+      <h3 id ="Winner_Loser_Text"></h3>
+      <div id ="WinnerForm">
+        <input type="text" id="UsernameWinner" placeholder="Enter User Name...(3 Letters)" maxlength="3"><br><br>
+        <em id="NameEmptyError"></em><br><br>
+        <button type="button" id="SubmitWinnerName">Submit</button>
+      </div>
+      <button type="button" id="LoseButton">Back Home</button>
     </div>
-
-    <p></p>
-    <input type="button" id="GameOverTemp" onclick="GameOver()" value="GameOverTemp" />
-
-
 
     <div id="app-root"></div>
 
@@ -45,6 +72,6 @@
       </div>
     </div>
 
-    <button type="button" id="LastSave" onclick="alert('Hello world!')">Load Last Save</button>
+
   </body>
 </html>

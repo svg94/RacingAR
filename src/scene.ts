@@ -19,7 +19,12 @@ import nipplejs from 'nipplejs';
 
 import { io } from "socket.io-client";
 import {Obstacle} from "./interfaces/IObstacle";
-import {displayHomescreenUI, removeHomescreenUI} from "./utils/domUtils";
+import {
+  addGameOverScreenLoser,
+  addGameOverScreenWinner,
+  displayHomescreenUI,
+  removeHomescreenUI
+} from "./utils/domUtils";
 //import {removeHomescreenUI} from "./utils/domUtils";
 //export let UILever = "Homescreen";
 
@@ -28,6 +33,7 @@ export function createScene(renderer: WebGLRenderer) {
   //UILever = "Game";
   const scene = new Scene()
   let isGameStarted = false;
+  let LostGame = false;
 
   //object pool for obstaclesMesh
   const NUMBERS_OF_OBSTACLES = 40;
@@ -127,7 +133,7 @@ export function createScene(renderer: WebGLRenderer) {
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
       removeHomescreenUI();
-      console.log('AR-Modus');
+      //console.log('AR-Modus');
       if (frame) {
         handleXRHitTest(renderer, frame, (hitPoseTransformed: Float32Array) => {
           if (hitPoseTransformed) {
@@ -212,6 +218,7 @@ export function createScene(renderer: WebGLRenderer) {
     }
     if(isBoardDisplayed) {
       planeMarker.visible = false;
+
 
         /*let i = 0.01;
         let startPosition = player.position.y;
@@ -351,8 +358,20 @@ export function createScene(renderer: WebGLRenderer) {
 
       //Check for Collision
       if(obj.obstacleBB.intersectsBox(playerBB)){ //obstacle.obstacleBB
-        console.log(obj); // TODO hier dann Aufruf fürs Spielende einfügen
-      }else{}
+        isGameStarted = false;
+        LostGame = true;
+        //addGameOverScreenLoser();
+        addGameOverScreenWinner();
+      }else{
+        if(isGameStarted == false){
+          if(LostGame == true){
+            //addGameOverScreenLoser();
+            addGameOverScreenWinner();
+          }else{
+            addGameOverScreenWinner();
+          }
+        }
+      }
       // i++;
     });
   }
