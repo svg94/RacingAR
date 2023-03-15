@@ -202,6 +202,20 @@ export function createScene(renderer: WebGLRenderer) {
       board.visible = true;
       player.visible = true;
       planeMarker.visible = false;
+      isBoardDisplayed = true;
+      if(isBoardDisplayed == true) {
+        scene.remove(planeMarker);
+        /*let i = 0.01;
+        let startPosition = player.position.y;
+        while (player.position.y < player.position.y + 0.2){
+          player.position.set(player.position.x,player.position.y + i,player.position.z)
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        let d = 0.01;
+        while (player.position.y > startPosition) {
+          player.position.set(player.position.x, player.position.y - d, player.position.z)
+        }*/
+      }
 
       //Bestimmt die möglichen X-Koordinaten für die Hindernisse
 
@@ -216,21 +230,7 @@ export function createScene(renderer: WebGLRenderer) {
 
       setInterval(moveObstacles,1000);
     }
-    if(isBoardDisplayed) {
-      planeMarker.visible = false;
 
-
-        /*let i = 0.01;
-        let startPosition = player.position.y;
-        while (player.position.y < player.position.y + 0.2){
-          player.position.set(player.position.x,player.position.y + i,player.position.z)
-        }
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        let d = 0.01;
-        while (player.position.y > startPosition) {
-          player.position.set(player.position.x, player.position.y - d, player.position.z)
-        }*/
-      }
       /*    if (crouchButton == true){
               player.position.set(player.position.x,player.position.y - speed/2,player.position.z)
             }
