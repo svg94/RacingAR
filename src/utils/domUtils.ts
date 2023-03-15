@@ -127,7 +127,7 @@ export function removeHomescreenUI(){
 export function displayHomescreenUI(){
   const Text: HTMLElement | null = document.getElementById("Texts");
   if (Text){
-      Text.innerText = "RacingAR2.0";
+      Text.innerText = "RacingAR";
   }
   // @ts-ignore
   document.getElementById('NewGamecodeButton').onclick = function() {
