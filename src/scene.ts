@@ -23,7 +23,7 @@ import {Obstacle} from "./interfaces/IObstacle";
 import {
   addGameOverScreenLoser,
   addGameOverScreenWinner,
-  displayHomescreenUI,
+  displayHomescreenUI, displayWaitingScreenUIP1, displayWaitingScreenUIP2,
   removeHomescreenUI
 } from "./utils/domUtils";
 //import {removeHomescreenUI} from "./utils/domUtils";
@@ -123,14 +123,69 @@ export function createScene(renderer: WebGLRenderer) {
   controls.maxAzimuthAngle = Math.PI/4 // radians
 
 
-  let enemyPlayers: any[] = [];
-  //Socket Connection
-  //@ts-ignore
-  //let socket = io("https://192.168.178.49:3001/",{ // Bojan IP
+  //Ganzes Connection Zeug mit Socket.io
+
+  mysocket.on("gameCode",handleGameCode);
+  mysocket.on("unkownGame",handleUnknownGame);
+  mysocket.on("tooManyPlayers",handleTooManyPlayers);
+  mysocket.on("TestNachricht", sendTestToAllPlayersInRoom)
 
   // @ts-ignore
-  document.getElementById('NewGamecodeButton').addEventListener('click',initiateSocketConnection);
+  document.getElementById('NewGamecodeButton').addEventListener('click',newGame);
+  // @ts-ignore
+  document.getElementById('JoinRoomButton').addEventListener('click',joinGame);
+
   let connectedSocket = false;
+
+  function newGame(){
+    connectedSocket = true;
+    mysocket.emit("newGame");
+    displayWaitingScreenUIP1();
+  }
+
+  function joinGame(){
+    //@ts-ignore
+    let gameCode = document.getElementById("Entergamecode").value;
+    // @ts-ignore
+    if (gameCode) {
+      mysocket.emit("joinGame", gameCode);
+      displayWaitingScreenUIP2();
+      //TODO DO Stuff in Backend to Join Game
+    }else{
+      alert("Name must be filled out");
+    }
+  }
+
+  function handleGameCode(roomName: string){
+    // @ts-ignore
+    document.getElementById("Gamecode").innerText = roomName;
+  }
+
+  function handleUnknownGame(){
+    // @ts-ignore
+    document.getElementById("BackHome").click();
+    alert("Unknown Game Code");
+  }
+
+  function handleTooManyPlayers(){
+    alert("Game is already full!");
+  }
+
+  function sendTestToAllPlayersInRoom(testNachricht: any){
+    // @ts-ignore
+    document.getElementById("Texts").innerText = testNachricht;
+  }
+
+
+
+
+
+
+
+
+  let enemyPlayers: any[] = [];
+
+
   function initiateSocketConnection(){
     connectedSocket = true;
 

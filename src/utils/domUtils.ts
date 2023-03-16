@@ -112,10 +112,33 @@ export function addGameOverScreenLoser(){
     document.getElementById("BackHome").click();
   }
 }
+export function displayWaitingScreenUIP1(){
+  //@ts-ignore
+  document.getElementById("WaitingUI").style.display = 'block';
+  //@ts-ignore
+  document.getElementById("WaitingMessage").innerText = "Wait for Player 2 to enter Game Code. After that press ARButton down below!"
+  // @ts-ignore
+  document.getElementById("JoinRoomUI").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("LastSave").style.display = 'none';
+}
+
+export function displayWaitingScreenUIP2(){
+  //@ts-ignore
+  document.getElementById("WaitingUI").style.display = 'block';
+  //@ts-ignore
+  document.getElementById("WaitingMessage").innerText = "Connected to a Room. Press ARButton when ready to start the Game!"
+  // @ts-ignore
+  document.getElementById("roomCreation").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("LastSave").style.display = 'none';
+}
 
 export function removeHomescreenUI(){
   // @ts-ignore
   document.getElementById("HomescreenUI").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("WaitingUI").style.display = 'none';
   if(Gameover == false){
     // @ts-ignore
     document.getElementById("BackHome").style.visibility = 'visible';
@@ -128,31 +151,11 @@ export function displayHomescreenUI(){
       Text.innerText = "RacingAR";
   }
   // @ts-ignore
-  document.getElementById('NewGamecodeButton').onclick = function() {
-    //TODO DO Stuff in Backend to Get Gamecode
-    mysocket.emit("connected");
-    let CodeBackend = "Gamecode XY";
-    const gameCode: HTMLElement | null = document.getElementById("Gamecode");
-    if (gameCode){
-      gameCode.innerText = CodeBackend;
-    }
-  }
-  // @ts-ignore
-  document.getElementById('JoinRoomButton').onclick = function() {
-    // @ts-ignore
-    let x = document.forms["JoinRoomForm"]["Entergamecode"].value;
-    if (x == "" || x == null) {
-      alert("Name must be filled out");
-    }else{
-      alert("Joining Session");
-      //TODO DO Stuff in Backend to Join Game
-    }
-  }
-
-  // @ts-ignore
   document.getElementById("BackHome").style.visibility = 'hidden';
   // @ts-ignore
   document.getElementById("GameOverScreenUI").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("WaitingUI").style.display = 'none';
 }
 
 
