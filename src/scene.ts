@@ -55,13 +55,15 @@ export function createScene(renderer: WebGLRenderer) {
     //console.log(obstacleBB);
     objectPool.push({
       obstacleMesh: obstacleMesh,
-      obstacleBB: obstacleBB
+      obstacleBB: obstacleBB,
+      id: i
     })
     //objectBBPool.push(obstacleBB)
   }
 
   //Variabel für Mögliche X Positions der Hindernisse
   let possibleObstacleXPosition: any = [];
+  let possibleObstacleZPosition: any = [];
 
   //Board
   const boardGeometry = new BoxBufferGeometry(1, 0.1, 1);
@@ -129,8 +131,9 @@ export function createScene(renderer: WebGLRenderer) {
   mysocket.on("gameCode", handleGameCode);
   mysocket.on("unkownGame", handleUnknownGame);
   mysocket.on("tooManyPlayers", handleTooManyPlayers);
-  mysocket.on("TestNachricht", sendTestToAllPlayersInRoom)
-  mysocket.on("TestBox", showTestBox)
+  mysocket.on("TestNachricht", sendTestToAllPlayersInRoom);
+  mysocket.on("TestBox", showTestBox);
+  mysocket.on("moveObstacles", moveObstaclesMP);
 
   // @ts-ignore
   document.getElementById('NewGamecodeButton').addEventListener('click', newGame);
@@ -184,17 +187,62 @@ export function createScene(renderer: WebGLRenderer) {
   function startGame(){
     //Test to show the same Block to all Players
     console.log("Start Game Click");
+    console.log(possibleObstacleXPosition);
+    console.log(possibleObstacleZPosition);
     mysocket.emit("startAR", gameCode);
   }
 
   function showTestBox(coords: any){
+    console.log("SHOW TEST BOX")
+    let boxX = possibleObstacleXPosition[coords.x];
+    let boxY = board.position.y + (board.geometry.parameters.height / 2);
+    let boxZ = possibleObstacleZPosition[coords.z];
     console.log(coords);
-    objectPool[0].obstacleMesh.position.set(coords.x,coords.y,coords.z);
+    objectPool[0].obstacleMesh.position.set(boxX,boxY,boxZ);
     objectPool[0].obstacleMesh.visible = true;
     console.log(objectPool[0].obstacleMesh);
   }
+  let i =0;
+  function moveObstaclesMP(obstacles: any[]){
 
+    console.log("MOVE OBSTACLES", i);
+    i+=1;
 
+    //ObjectPoolLogic
+    if (isGameStarted) {
+      let inactiveObjectsBackend = obstacles.filter(obj => !obj.active);
+      let activeObjectsBackend = obstacles.filter(obj => obj.active);
+
+      inactiveObjectsBackend.forEach(obj=>{
+        objectPool[obj.id].obstacleMesh.visible = false;
+      });
+
+      if (activeObjectsBackend.length > 0) {
+        //let i = 0;
+        activeObjectsBackend.forEach(obj => {
+          let pos = obj.pos;
+          let posX = possibleObstacleXPosition[pos.x];;
+          let posY = board.position.y + (board.geometry.parameters.height / 2);
+          let posZ = possibleObstacleZPosition[pos.z];
+
+          objectPool[obj.id].obstacleMesh.position.set(posX, posY, posZ);
+          objectPool[obj.id].obstacleMesh.visible = true;
+        });
+      }
+
+    }
+  }
+
+  //  function showTestBox(coords: any){
+  //     console.log("SHOW TEST BOX")
+  //     let boxX = possibleObstacleXPosition[coords.x];
+  //     let boxY = board.position.y + (board.geometry.parameters.height / 2);
+  //     let boxZ = possibleObstacleZPosition[coords.z];
+  //     console.log(coords);
+  //     objectPool[0].obstacleMesh.position.set(boxX,boxY,boxZ);
+  //     objectPool[0].obstacleMesh.visible = true;
+  //     console.log(objectPool[0].obstacleMesh);
+  //   }
 
 
 
@@ -385,11 +433,17 @@ export function createScene(renderer: WebGLRenderer) {
         possibleObstacleXPosition.push(loopX);
         loopX = loopX + 0.05; // 0.05 für die Breite der Hindernisse
       }
+      let loopZ = (board.position.z-board.geometry.parameters.depth/2);
+      while (loopZ < (board.position.z-board.geometry.parameters.depth/2)+1){ //1 für die Länge des Spielbretts
+        possibleObstacleZPosition.push(loopZ);
+        loopZ = loopZ + 0.05; // 0.05 für die Breite der Hindernisse
+        console.log(loopZ);
+      }
 
       isBoardDisplayed = true;
       isGameStarted = true;
 
-      setInterval(moveObstacles,1000);
+      //setInterval(moveObstacles,1000);
     }
 
       /*    if (crouchButton == true){
@@ -427,19 +481,6 @@ export function createScene(renderer: WebGLRenderer) {
         activeObjects.forEach(obj => {
           let pos = obj.obstacleMesh.position;
           obj.obstacleMesh.position.set(pos.x, pos.y, pos.z + (speed * 10));
-
-          //Update BoundingBox of Obstacle
-          //console.log(obj);
-
-          //objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
-          //console.log(objectBBPool.at(i));
-
-          //Check for Collision
-
-          /*if(objectBBPool.at(i).intersectsBox(playerBB)){ //obstacle.obstacleBB
-            console.log(obj);
-          }else{}
-          i++;*/
 
 
           if (!(pos.z + 0.025 < board.position.z + 0.5)) {
