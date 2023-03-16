@@ -62,6 +62,8 @@ export function addGameOverScreenWinner(){
   // @ts-ignore
   document.getElementById("BackHome").style.visibility = 'hidden';
   // @ts-ignore
+  document.getElementById("StartGameMultiplayer").style.visibility = 'hidden';
+  // @ts-ignore
   document.getElementById("GameOverScreenUI").style.display = 'block';
   // @ts-ignore
   document.getElementById("LoseButton").style.visibility = 'hidden';
@@ -97,6 +99,8 @@ export function addGameOverScreenLoser(){
   document.getElementById("mobileInterface").style.visibility = 'hidden';
   // @ts-ignore
   document.getElementById("BackHome").style.visibility = 'hidden';
+  // @ts-ignore
+  document.getElementById("StartGameMultiplayer").style.visibility = 'hidden';
   // @ts-ignore
   document.getElementById("GameOverScreenUI").style.display = 'block';
   // @ts-ignore
@@ -142,6 +146,8 @@ export function removeHomescreenUI(){
   if(Gameover == false){
     // @ts-ignore
     document.getElementById("BackHome").style.visibility = 'visible';
+    //@ts-ignore
+    document.getElementById("StartGameMultiplayer").style.display = 'block';
   }
 }
 
@@ -156,6 +162,8 @@ export function displayHomescreenUI(){
   document.getElementById("GameOverScreenUI").style.display = 'none';
   // @ts-ignore
   document.getElementById("WaitingUI").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("StartGameMultiplayer").style.display = 'none';
 }
 
 

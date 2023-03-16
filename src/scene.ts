@@ -12,7 +12,7 @@ import {
   Scene,
   WebGLRenderer,
   XRFrame,
-  AxesHelper, Vector3, Box3
+  AxesHelper, Vector3, Box3, Event, Object3D
 } from "three";
 import {
   OrbitControls
@@ -31,7 +31,6 @@ import {
 
 export function createScene(renderer: WebGLRenderer) {
 
-  //UILever = "Game";
   const scene = new Scene()
   let isGameStarted = false;
   let LostGame = false;
@@ -40,9 +39,9 @@ export function createScene(renderer: WebGLRenderer) {
   const NUMBERS_OF_OBSTACLES = 40;
   let objectPool: Obstacle[] = [];
   //let objectBBPool: any[] = [];
-  for(let i=0; i < NUMBERS_OF_OBSTACLES; i++){
+  for (let i = 0; i < NUMBERS_OF_OBSTACLES; i++) {
     const obstacleGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
-    const obstacleMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+    const obstacleMaterial = new MeshBasicMaterial({color: 0xff0000});
     const obstacleMesh = new Mesh(obstacleGeometry, obstacleMaterial);
     const obstacleBB = new Box3(new Vector3(), new Vector3());
     obstacleBB.setFromObject(obstacleMesh);
@@ -62,17 +61,19 @@ export function createScene(renderer: WebGLRenderer) {
   }
 
   //Variabel für Mögliche X Positions der Hindernisse
-  let possibleObstacleXPosition :any = [];
+  let possibleObstacleXPosition: any = [];
 
   //Board
   const boardGeometry = new BoxBufferGeometry(1, 0.1, 1);
-  const boardMaterial = new MeshBasicMaterial({ color: 0xffffff });
+  const boardMaterial = new MeshBasicMaterial({color: 0xffffff});
   const board = new Mesh(boardGeometry, boardMaterial);
 
   //Player
   const playerGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
-  const playerMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
+  const playerMaterial = new MeshBasicMaterial({color: 0x00ff00});
   const player = new Mesh(playerGeometry, playerMaterial);
+
+
   // @ts-ignore
   let playerName: string;
   // @ts-ignore
@@ -110,7 +111,7 @@ export function createScene(renderer: WebGLRenderer) {
   controls.maxDistance = 100;
   controls.minDistance = 100;
   //controls.maxPolarAngle = (Math.PI / 4) * 3;
-  controls.maxPolarAngle = Math.PI/2 ;
+  controls.maxPolarAngle = Math.PI / 2;
   controls.minPolarAngle = 0;
   controls.autoRotate = false;
   controls.autoRotateSpeed = 0;
@@ -119,61 +120,78 @@ export function createScene(renderer: WebGLRenderer) {
   controls.dampingFactor = 0.1;
   controls.enableZoom = false;
   controls.enablePan = false;
-  controls.minAzimuthAngle = - Math.PI/2; // radians
-  controls.maxAzimuthAngle = Math.PI/4 // radians
+  controls.minAzimuthAngle = -Math.PI / 2; // radians
+  controls.maxAzimuthAngle = Math.PI / 4 // radians
 
 
   //Ganzes Connection Zeug mit Socket.io
 
-  mysocket.on("gameCode",handleGameCode);
-  mysocket.on("unkownGame",handleUnknownGame);
-  mysocket.on("tooManyPlayers",handleTooManyPlayers);
+  mysocket.on("gameCode", handleGameCode);
+  mysocket.on("unkownGame", handleUnknownGame);
+  mysocket.on("tooManyPlayers", handleTooManyPlayers);
   mysocket.on("TestNachricht", sendTestToAllPlayersInRoom)
+  mysocket.on("TestBox", showTestBox)
 
   // @ts-ignore
-  document.getElementById('NewGamecodeButton').addEventListener('click',newGame);
+  document.getElementById('NewGamecodeButton').addEventListener('click', newGame);
   // @ts-ignore
-  document.getElementById('JoinRoomButton').addEventListener('click',joinGame);
+  document.getElementById('JoinRoomButton').addEventListener('click', joinGame);
+  // @ts-ignore
+  document.getElementById('StartGameMultiplayer').addEventListener('click', startGame);
 
   let connectedSocket = false;
 
-  function newGame(){
+  function newGame() {
     connectedSocket = true;
     mysocket.emit("newGame");
     displayWaitingScreenUIP1();
   }
 
-  function joinGame(){
+  let gameCode: any;
+
+  function joinGame() {
     //@ts-ignore
-    let gameCode = document.getElementById("Entergamecode").value;
+    gameCode = document.getElementById("Entergamecode").value;
     // @ts-ignore
     if (gameCode) {
       mysocket.emit("joinGame", gameCode);
       displayWaitingScreenUIP2();
       //TODO DO Stuff in Backend to Join Game
-    }else{
+    } else {
       alert("Name must be filled out");
     }
   }
 
-  function handleGameCode(roomName: string){
+  function handleGameCode(roomName: string) {
     // @ts-ignore
     document.getElementById("Gamecode").innerText = roomName;
   }
 
-  function handleUnknownGame(){
+  function handleUnknownGame() {
     // @ts-ignore
     document.getElementById("BackHome").click();
     alert("Unknown Game Code");
   }
 
-  function handleTooManyPlayers(){
+  function handleTooManyPlayers() {
     alert("Game is already full!");
   }
 
-  function sendTestToAllPlayersInRoom(testNachricht: any){
+  function sendTestToAllPlayersInRoom(testNachricht: any) {
     // @ts-ignore
     document.getElementById("Texts").innerText = testNachricht;
+  }
+  function startGame(){
+    //Test to show the same Block to all Players
+    console.log("Start Game Click");
+    mysocket.emit("startAR", gameCode);
+  }
+
+  function showTestBox(coords: any){
+    console.log(coords);
+    objectPool[0].obstacleMesh.position.set(coords.x,coords.y,coords.z);
+    objectPool[0].obstacleMesh.visible = true;
+    console.log(objectPool[0].obstacleMesh);
   }
 
 
@@ -270,6 +288,7 @@ export function createScene(renderer: WebGLRenderer) {
 
   scene.add(planeMarker);
 
+
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
       removeHomescreenUI();
@@ -287,7 +306,7 @@ export function createScene(renderer: WebGLRenderer) {
 
       }
       updatePlayer();
-      checkCollision();
+      //checkCollision();
       renderer.render(scene, camera);
       controls.update();
     }else{
@@ -296,6 +315,7 @@ export function createScene(renderer: WebGLRenderer) {
   }
 
   renderer.setAnimationLoop(renderLoop);
+
 
   /*/End AR-Mode
   let session = renderer.xr.getSession();
@@ -324,6 +344,7 @@ export function createScene(renderer: WebGLRenderer) {
   let speed = 0.01;
 
   async function onSelect() {
+
     if (planeMarker.visible && !isBoardDisplayed) {
 
       board.position.setFromMatrixPosition(planeMarker.matrix);
