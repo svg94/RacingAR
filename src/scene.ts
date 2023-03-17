@@ -75,6 +75,11 @@ export function createScene(renderer: WebGLRenderer) {
   const playerMaterial = new MeshBasicMaterial({color: 0x00ff00});
   const player = new Mesh(playerGeometry, playerMaterial);
 
+  //Enemy
+  const enemyGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
+  const enemyMaterial = new MeshBasicMaterial({color: 0xff8200});
+  const enemy = new Mesh(enemyGeometry, enemyMaterial);
+
 
   // @ts-ignore
   let playerName: string;
@@ -89,8 +94,10 @@ export function createScene(renderer: WebGLRenderer) {
 
   board.visible = false;
   player.visible = false;
+  enemy.visible = false;
   scene.add(board);
   scene.add(player);
+  scene.add(enemy);
 
   const camera = new PerspectiveCamera(
       70,
@@ -134,6 +141,7 @@ export function createScene(renderer: WebGLRenderer) {
   mysocket.on("TestNachricht", sendTestToAllPlayersInRoom);
   mysocket.on("TestBox", showTestBox);
   mysocket.on("moveObstacles", moveObstaclesMP);
+  mysocket.on("DisplayPlayers", displayPlayers);
 
   // @ts-ignore
   document.getElementById('NewGamecodeButton').addEventListener('click', newGame);
@@ -202,6 +210,23 @@ export function createScene(renderer: WebGLRenderer) {
     objectPool[0].obstacleMesh.visible = true;
     console.log(objectPool[0].obstacleMesh);
   }
+
+  function displayPlayers(playersCoords: any){
+    console.log("Display Player")
+    let player1X = possibleObstacleXPosition[playersCoords[0].pos.x];
+    let player1Y = board.position.y + (board.geometry.parameters.height / 2);
+    let player1Z = possibleObstacleZPosition[playersCoords[0].pos.z];
+    console.log(player1X, player1Y, player1Z);
+    player.position.set(player1X,player1Y,player1Z);
+    enemy.position.set(player1X,player1Y,player1Z);
+    player.visible = true;
+    enemy.visible = true;
+    console.log(player);
+  }
+
+
+
+
   let i =0;
   function moveObstaclesMP(obstacles: any[]){
 
