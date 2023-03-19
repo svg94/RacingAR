@@ -74,6 +74,7 @@ export function createScene(renderer: WebGLRenderer) {
   const playerGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
   const playerMaterial = new MeshBasicMaterial({color: 0x00ff00});
   const player = new Mesh(playerGeometry, playerMaterial);
+  let playerNumber = 0;
 
   //Enemy
   const enemyGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
@@ -142,7 +143,8 @@ export function createScene(renderer: WebGLRenderer) {
   mysocket.on("TestBox", showTestBox);
   mysocket.on("moveObstacles", moveObstaclesMP);
   mysocket.on("DisplayPlayers", displayPlayers);
-
+  mysocket.on("playerNumber", handlePlayerNumber);
+  mysocket.on('gameState', handleGameState);
   // @ts-ignore
   document.getElementById('NewGamecodeButton').addEventListener('click', newGame);
   // @ts-ignore
@@ -187,7 +189,53 @@ export function createScene(renderer: WebGLRenderer) {
   function handleTooManyPlayers() {
     alert("Game is already full!");
   }
+  function handlePlayerNumber(pPlayerNumber: number) {
+    playerNumber = pPlayerNumber;
+  }
+  function handleGameState(gameState: any){
+    console.log("Display Player")
+    let playersCoords = gameState.players;
+    let playerCoords = playersCoords.filter((player: any)=>player.number===1);
 
+    let zwischenErgebnisXPlayer = playerCoords[0].pos.x * 0.05;
+    let xCordBrettPlayer = zwischenErgebnisXPlayer + (board.position.x-board.geometry.parameters.width/2);
+
+    let zwischenErgebnisZPlayer = playerCoords[0].pos.z * 0.05;
+    let zCordBrettPlayer = zwischenErgebnisZPlayer + (board.position.z-board.geometry.parameters.depth/2);
+
+
+    console.log(playersCoords);
+    console.log(playerCoords);
+    console.log(playerCoords[0].pos.x);
+    let x = playerCoords[0].pos.x
+    let playerX = xCordBrettPlayer //possibleObstacleXPosition[x];
+    let playerY = board.position.y + (board.geometry.parameters.height / 2);
+    let playerZ = zCordBrettPlayer; //possibleObstacleZPosition[playerCoords[0].pos.z];
+    console.log(playerX, playerY, playerZ);
+    player.position.set(playerX,playerY,playerZ);
+    player.visible = true;
+    // player.updateMatrixWorld()
+
+    let enemyCoords = playersCoords.filter((player: any)=>player.number===2);
+
+    let zwischenErgebnisXEnemy = enemyCoords[0].pos.x * 0.05;
+    let xCordBrettEnemy = zwischenErgebnisXEnemy + (board.position.x-board.geometry.parameters.width/2);
+
+    let zwischenErgebnisZEnemy = enemyCoords[0].pos.z * 0.05;
+    let zCordBrettEnemy = zwischenErgebnisZEnemy + (board.position.z-board.geometry.parameters.depth/2);
+
+    let enemyX = xCordBrettEnemy;
+    let enemyY = board.position.y + (board.geometry.parameters.height / 2);
+    let enemyZ = zCordBrettEnemy;
+    enemy.position.set(enemyX,enemyY,enemyZ);
+    enemy.visible = true;
+    // enemy.updateMatrixWorld()
+
+    console.log("Spieler1");
+    console.log(player);
+    console.log("Spieler2/Enemy");
+    console.log(enemy);
+  }
   function sendTestToAllPlayersInRoom(testNachricht: any) {
     // @ts-ignore
     document.getElementById("Texts").innerText = testNachricht;
@@ -201,27 +249,41 @@ export function createScene(renderer: WebGLRenderer) {
   }
 
   function showTestBox(coords: any){
-    console.log("SHOW TEST BOX")
-    let boxX = possibleObstacleXPosition[coords.x];
-    let boxY = board.position.y + (board.geometry.parameters.height / 2);
-    let boxZ = possibleObstacleZPosition[coords.z];
-    console.log(coords);
-    objectPool[0].obstacleMesh.position.set(boxX,boxY,boxZ);
-    objectPool[0].obstacleMesh.visible = true;
-    console.log(objectPool[0].obstacleMesh);
+    // console.log("SHOW TEST BOX")
+    // let boxX = possibleObstacleXPosition[coords.x];
+    // let boxY = board.position.y + (board.geometry.parameters.height / 2);
+    // let boxZ = possibleObstacleZPosition[coords.z];
+    // console.log(coords);
+    // objectPool[0].obstacleMesh.position.set(boxX,boxY,boxZ);
+    // objectPool[0].obstacleMesh.visible = true;
+    // console.log(objectPool[0].obstacleMesh);
   }
 
   function displayPlayers(playersCoords: any){
     console.log("Display Player")
-    let player1X = possibleObstacleXPosition[playersCoords[0].pos.x];
-    let player1Y = board.position.y + (board.geometry.parameters.height / 2);
-    let player1Z = possibleObstacleZPosition[playersCoords[0].pos.z];
-    console.log(player1X, player1Y, player1Z);
-    player.position.set(player1X,player1Y,player1Z);
-    enemy.position.set(player1X,player1Y,player1Z);
+    let playerCoords = playersCoords.filter((player: any)=>player.number===1);
+    console.log(playersCoords);
+    console.log(playerCoords);
+    console.log(playerCoords[0].pos.x);
+    let x = playerCoords[0].pos.x
+    let playerX = possibleObstacleXPosition[x];
+    let playerY = board.position.y + (board.geometry.parameters.height / 2);
+    let playerZ = possibleObstacleZPosition[playerCoords[0].pos.z];
+    console.log(playerX, playerY, playerZ);
+    player.position.set(playerX,playerY,playerZ);
     player.visible = true;
+
+    let enemyCoords = playersCoords.filter((player: any)=>player.number===2);
+    let enemyX = possibleObstacleXPosition[enemyCoords[0].pos.x];
+    let enemyY = board.position.y + (board.geometry.parameters.height / 2);
+    let enemyZ = possibleObstacleZPosition[enemyCoords[0].pos.z];
+    enemy.position.set(enemyX,enemyY,enemyZ);
     enemy.visible = true;
+
+    console.log("Spieler1");
     console.log(player);
+    console.log("Spieler2/Enemy");
+    console.log(enemy);
   }
 
 
@@ -361,7 +423,7 @@ export function createScene(renderer: WebGLRenderer) {
 
   scene.add(planeMarker);
 
-
+  let bremse = 0;
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
       removeHomescreenUI();
@@ -378,7 +440,12 @@ export function createScene(renderer: WebGLRenderer) {
 
 
       }
-      updatePlayer();
+      bremse+=1
+      if(bremse > 10){
+        bremse = 0;
+        updatePlayer();
+      }
+
       //checkCollision();
       renderer.render(scene, camera);
       controls.update();
@@ -519,47 +586,48 @@ export function createScene(renderer: WebGLRenderer) {
 
   function updatePlayer(){
     // move the player
-    const speed = 0.05;
+    const speed = 0.2;
     if ((fwdValue > 0) && (player.position.z - 0.025 > board.position.z - 0.5)) {
       tempVector
           .set(0, 0, -fwdValue*speed)
-      player.position.addScaledVector(
-          tempVector,
-          1
-      )
+      tempVector.add(player.position)
+      let normalisedCoords = normalisePosition(tempVector);
+      let playerCoords = {"pos":normalisedCoords, "number":playerNumber};
+      mysocket.emit("keydown", playerCoords);
     }
 
     if ((bkdValue > 0) && (player.position.z + 0.025 < board.position.z + 0.5)) {
       tempVector
           .set(0, 0, bkdValue * speed)
-      player.position.addScaledVector(
-          tempVector,
-          1
-      )
+      tempVector.add(player.position)
+      let normalisedCoords = normalisePosition(tempVector);
+      let playerCoords = {"pos":normalisedCoords, "number":playerNumber};
+      mysocket.emit("keydown", playerCoords);
     }
 
     if ((lftValue > 0) && (player.position.x - 0.025 > board.position.x - 0.5)) {
       tempVector
           .set(-lftValue * speed, 0, 0)
-      player.position.addScaledVector(
-          tempVector,
-          1
-      )
+      tempVector.add(player.position)
+      let normalisedCoords = normalisePosition(tempVector);
+      let playerCoords = {"pos":normalisedCoords, "number":playerNumber};
+      mysocket.emit("keydown", playerCoords);
     }
 
     if ((rgtValue > 0) && (player.position.x + 0.025 < board.position.x + 0.5)) {
       tempVector
           .set(rgtValue * speed, 0, 0)
-      player.position.addScaledVector(
-          tempVector,
-          1
-      )
+      tempVector.add(player.position)
+      let normalisedCoords = normalisePosition(tempVector);
+      let playerCoords = {"pos":normalisedCoords, "number":playerNumber};
+      mysocket.emit("keydown", playerCoords);
     }
 
+    //braucht man bei keydown listener event
     player.updateMatrixWorld()
-    mysocket.emit('updatedPlayers')
 
     //Update BoundingBox of Player
+    //Müssen wir nachher rüber nehmen
     if (player.geometry.boundingBox instanceof Box3) {
       playerBB.copy(player.geometry.boundingBox).applyMatrix4(player.matrixWorld);
     }
@@ -572,7 +640,32 @@ export function createScene(renderer: WebGLRenderer) {
 
 
   };
-
+  function normalisePosition(tempVector: Vector3){
+    let faktor = 0.05; //Das sind die Schritte die für das Erstellen des Obstacle Arrays "possibleObstacleXPosition" verwendet wurden.
+  //   let loopX = (board.position.x-board.geometry.parameters.width/2);
+    //       while (loopX < (board.position.x-board.geometry.parameters.width/2)+1){ //1 für die Länge des Spielbretts
+    //         possibleObstacleXPosition.push(loopX);
+    //         loopX = loopX + 0.05; // 0.05 für die Breite der Hindernisse
+    //       }
+    //       let loopZ = (board.position.z-board.geometry.parameters.depth/2);
+    //       while (loopZ < (board.position.z-board.geometry.parameters.depth/2)+1){ //1 für die Länge des Spielbretts
+    //         possibleObstacleZPosition.push(loopZ);
+    //         loopZ = loopZ + 0.05; // 0.05 für die Breite der Hindernisse
+    //         console.log(loopZ);
+    //       }
+    //calculate x   Dim: Dimension
+    let brettObenLinksX_raumDim = (board.position.x-board.geometry.parameters.width/2) //In boardDim = 0
+    let diffPosX_raumDim = brettObenLinksX_raumDim - tempVector.x;
+    let normalisedX = Math.abs(diffPosX_raumDim / faktor);
+    //calculate z
+    let brettObenLinksZ_raumDim = (board.position.z-board.geometry.parameters.depth/2) //In boardDim = 0
+    let diffPosZ_raumDim = brettObenLinksZ_raumDim - tempVector.z;
+    let normalisedZ = Math.abs(diffPosZ_raumDim / faktor);
+    return {
+      x: normalisedX,
+      z: normalisedZ
+    }
+  }
   function checkCollision(){
     //Check for Collision
     let activeObjects = objectPool.filter(obj => obj.obstacleMesh.visible);

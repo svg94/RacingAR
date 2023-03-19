@@ -49,7 +49,7 @@ module.exports = {
     clean: true,
   },
   devServer: {
-    host: '192.168.2.43',
+    host: '192.168.178.49', //192.168.178.49 Bojan IP || 192.168.2.43 Daniel IP
     open: false,
     port: 8080,
     https: {
