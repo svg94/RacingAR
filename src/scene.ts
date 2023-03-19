@@ -180,6 +180,8 @@ export function createScene(renderer: WebGLRenderer) {
   function handleGameCode(roomName: string) {
     // @ts-ignore
     document.getElementById("Gamecode").innerText = roomName;
+
+    gameCode = roomName;
   }
 
   function handleUnknownGame() {
@@ -195,6 +197,16 @@ export function createScene(renderer: WebGLRenderer) {
     playerNumber = pPlayerNumber;
   }
   function handleGameState(gameState: any){
+    if(gameState.winner){
+      isGameStarted = false;
+      if(gameState.winner === playerNumber){
+        addGameOverScreenWinner();
+      }else{
+        addGameOverScreenLoser();
+      }
+      return;
+    }
+
     let playersCoords = gameState.players;
     let playerCoords = playersCoords.filter((player: any)=>player.number===1);
 
@@ -327,8 +339,10 @@ export function createScene(renderer: WebGLRenderer) {
 
       }
 
-      updatePlayer();
-      checkCollision();
+      if(isGameStarted){
+        updatePlayer();
+        checkCollision();
+      }
       renderer.render(scene, camera);
       controls.update();
     }else{
@@ -556,28 +570,25 @@ export function createScene(renderer: WebGLRenderer) {
 
       //Check for Collision
       if(obj.obstacleBB.intersectsBox(playerBB)){ //obstacle.obstacleBB
-        console.log("----PlayerBB------")
-        console.log(playerBB)
-        console.log("-------Player-----")
-        console.log(player)
-        console.log("-------Enemy-----")
-        console.log(enemy)
-        console.log("--------Obj----")
-        console.log(obj)
-        isGameStarted = false;
+        // isGameStarted = false;
         LostGame = true;
+        mysocket.emit("collision",{
+          gameCode,
+          playerNumber
+        });
         //addGameOverScreenLoser();
-        addGameOverScreenWinner();
-      }else{
-        if(isGameStarted == false){
-          if(LostGame == true){
-            //addGameOverScreenLoser();
-            addGameOverScreenWinner();
-          }else{
-            addGameOverScreenWinner();
-          }
-        }
+        //addGameOverScreenWinner();
       }
+      // else{
+      //   if(isGameStarted == false){
+      //     if(LostGame == true){
+      //       //addGameOverScreenLoser();
+      //       addGameOverScreenWinner();
+      //     }else{
+      //       addGameOverScreenWinner();
+      //     }
+      //   }
+      // }
       i++;
     });
   }
