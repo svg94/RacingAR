@@ -583,40 +583,44 @@ export function createScene(renderer: WebGLRenderer) {
   }
 
   function updatePlayer(){
+    let position = player.position;
+    if(playerNumber === 2){
+      position = enemy.position;
+    }
     // move the player
     const speed = 0.0625;
-    let sensitivity = 0.7;
-    if ((fwdValue > sensitivity) && (player.position.z - 0.025 > board.position.z - 0.5)) {
+    let sensitivity = 0.3;
+    if ((fwdValue > sensitivity) && (position.z - 0.025 > board.position.z - 0.5)) {
       tempVector
           .set(0, 0, -fwdValue*speed)
-      tempVector.add(player.position);
+      tempVector.add(position);
       let difference = normalisePosition(tempVector);
       let playerCoords = {"pos":difference, "number":playerNumber};
       mysocket.emit("keydown", playerCoords);
     }
 
-    if ((bkdValue > sensitivity) && (player.position.z + 0.025 < board.position.z + 0.5)) {
+    if ((bkdValue > sensitivity) && (position.z + 0.025 < board.position.z + 0.5)) {
       tempVector
           .set(0, 0, bkdValue * speed)
-      tempVector.add(player.position)
+      tempVector.add(position)
       let difference = normalisePosition(tempVector);
       let playerCoords = {"pos":difference, "number":playerNumber};
       mysocket.emit("keydown", playerCoords);
     }
 
-    if ((lftValue > sensitivity) && (player.position.x - 0.025 > board.position.x - 0.5)) {
+    if ((lftValue > sensitivity) && (position.x - 0.025 > board.position.x - 0.5)) {
       tempVector
           .set(-lftValue * speed, 0, 0)
-      tempVector.add(player.position)
+      tempVector.add(position)
       let difference = normalisePosition(tempVector);
       let playerCoords = {"pos":difference, "number":playerNumber};
       mysocket.emit("keydown", playerCoords);
     }
 
-    if ((rgtValue > sensitivity) && (player.position.x + 0.025 < board.position.x + 0.5)) {
+    if ((rgtValue > sensitivity) && (position.x + 0.025 < board.position.x + 0.5)) {
       tempVector
           .set(rgtValue * speed, 0, 0)
-      tempVector.add(player.position)
+      tempVector.add(position)
       let difference = normalisePosition(tempVector);
       let playerCoords = {"pos":difference, "number":playerNumber};
       mysocket.emit("keydown", playerCoords);
