@@ -38,27 +38,25 @@ export function createScene(renderer: WebGLRenderer) {
   //object pool for obstaclesMesh
   const NUMBERS_OF_OBSTACLES = 40;
   let objectPool: Obstacle[] = [];
-  //let objectBBPool: any[] = [];
+
   for (let i = 0; i < NUMBERS_OF_OBSTACLES; i++) {
     const obstacleGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
     const obstacleMaterial = new MeshBasicMaterial({color: 0xff0000});
     const obstacleMesh = new Mesh(obstacleGeometry, obstacleMaterial);
+    obstacleMesh.position.set(-100,-100,-100);
     const obstacleBB = new Box3(new Vector3(), new Vector3());
     obstacleBB.setFromObject(obstacleMesh);
-    //const obstacle = new ObstacleClass(obstacleMesh,obstacleBB);
 
     obstacleMesh.rotation.y = 0;
 
     obstacleMesh.visible = false;
     scene.add(obstacleMesh);
-    //console.log(obstacleMesh);
-    //console.log(obstacleBB);
+
     objectPool.push({
       obstacleMesh: obstacleMesh,
       obstacleBB: obstacleBB,
       id: i
     })
-    //objectBBPool.push(obstacleBB)
   }
 
   //Variabel für Mögliche X Positions der Hindernisse
@@ -74,23 +72,28 @@ export function createScene(renderer: WebGLRenderer) {
   const playerGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
   const playerMaterial = new MeshBasicMaterial({color: 0x00ff00});
   const player = new Mesh(playerGeometry, playerMaterial);
+  player.position.set(100,100,100);
   let playerNumber = 0;
 
   //Enemy
   const enemyGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
   const enemyMaterial = new MeshBasicMaterial({color: 0xff8200});
   const enemy = new Mesh(enemyGeometry, enemyMaterial);
-
+  enemy.position.set(100,100,100);
 
   // @ts-ignore
   let playerName: string;
   // @ts-ignore
   let lobbyName;
 
-  console.log("Hallo Test");
   //BoundingBox of player
   const playerBB = new Box3(new Vector3(), new Vector3()); //ein Vector for min and one for max
   playerBB.setFromObject(player);
+  if(playerNumber === 2){
+    //BoundingBox of player
+    playerBB.setFromObject(enemy);
+  }
+
   //console.log(playerBB);
 
   board.visible = false;
@@ -169,7 +172,6 @@ export function createScene(renderer: WebGLRenderer) {
     if (gameCode) {
       mysocket.emit("joinGame", gameCode);
       displayWaitingScreenUIP2();
-      //TODO DO Stuff in Backend to Join Game
     } else {
       alert("Name must be filled out");
     }
@@ -193,7 +195,6 @@ export function createScene(renderer: WebGLRenderer) {
     playerNumber = pPlayerNumber;
   }
   function handleGameState(gameState: any){
-    console.log("Display Player")
     let playersCoords = gameState.players;
     let playerCoords = playersCoords.filter((player: any)=>player.number===1);
 
@@ -203,16 +204,9 @@ export function createScene(renderer: WebGLRenderer) {
     let boardZ_obenLinks = (board.position.z-board.geometry.parameters.depth/2);
     let zCordBrettPlayer = boardZ_obenLinks + playerCoords[0].pos.z;
 
-
-    console.log(playersCoords);
-    console.log(playerCoords);
-    console.log(playerCoords[0].pos.x);
-    console.log(xCordBrettPlayer);
-    console.log(zCordBrettPlayer);
     let playerX = xCordBrettPlayer //possibleObstacleXPosition[x];
     let playerY = board.position.y + (board.geometry.parameters.height / 2);
     let playerZ = zCordBrettPlayer; //possibleObstacleZPosition[playerCoords[0].pos.z];
-    console.log(playerX, playerY, playerZ);
     player.position.set(playerX,playerY,playerZ);
     player.visible = true;
     // player.updateMatrixWorld()
@@ -228,11 +222,6 @@ export function createScene(renderer: WebGLRenderer) {
     enemy.position.set(enemyX,enemyY,enemyZ);
     enemy.visible = true;
     // enemy.updateMatrixWorld()
-
-    console.log("Spieler1");
-    console.log(player);
-    console.log("Spieler2/Enemy");
-    console.log(enemy);
   }
   function sendTestToAllPlayersInRoom(testNachricht: any) {
     // @ts-ignore
@@ -317,111 +306,10 @@ export function createScene(renderer: WebGLRenderer) {
 
     }
   }
-
-  //  function showTestBox(coords: any){
-  //     console.log("SHOW TEST BOX")
-  //     let boxX = possibleObstacleXPosition[coords.x];
-  //     let boxY = board.position.y + (board.geometry.parameters.height / 2);
-  //     let boxZ = possibleObstacleZPosition[coords.z];
-  //     console.log(coords);
-  //     objectPool[0].obstacleMesh.position.set(boxX,boxY,boxZ);
-  //     objectPool[0].obstacleMesh.visible = true;
-  //     console.log(objectPool[0].obstacleMesh);
-  //   }
-
-
-
-
-
-
-  let enemyPlayers: any[] = [];
-
-
-  function initiateSocketConnection(){
-    connectedSocket = true;
-
-    // // @ts-ignore
-    // playerName = document.getElementById('playerName').innerText;
-    // // @ts-ignore
-    // lobbyName = document.getElementById('lobbyName').innerText;
-    playerName = "Player"+Math.floor(Math.random() * 100);
-    lobbyName = "Lobby123"
-    // Frag nach allen Spielern, die schon da sind
-    mysocket.emit("joined");
-
-    // Sag, dass ich joine
-    mysocket.emit("join",{"name":playerName,"lobbyID":lobbyName});
-
-    // Gib alle, die schon in der Lobby sind
-    mysocket.on("joined",(enemies: any[])=>{
-      console.log("EVENT JOINED", enemies);
-      enemies.forEach((enemy: any)=>{
-        if(enemy.name === playerName){
-          console.log("Eigener Player");
-          return;
-        }
-        //Create Enemy
-        const enemyGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
-        const enemyMaterial = new MeshBasicMaterial({ color: 0xffa500 });
-        const enemyObject = new Mesh(enemyGeometry, enemyMaterial);
-
-        enemyObject.rotation.y = 0;
-        enemyObject.visible = true;
-        scene.add(enemyObject);
-
-        const pos= board.position;
-        enemyObject.position.set(pos.x,pos.y+(board.geometry.parameters.height/2),pos.z);
-
-        enemy.enemyObject = enemyObject
-        enemyPlayers.push(enemy);
-      })
-    });
-
-    // Gib jeden, der grad joined
-    mysocket.on("join",(enemy: any)=>{
-      if(enemy.name === playerName){
-        return;
-      }
-      console.log("EVENT JOIN", enemy);
-      //Create Enemy
-      const enemyGeometry = new BoxBufferGeometry(0.05, 0.05, 0.05);
-      const enemyMaterial = new MeshBasicMaterial({ color: 0xffa500 });
-      const enemyObject = new Mesh(enemyGeometry, enemyMaterial);
-
-      enemyObject.rotation.y = 0;
-      enemyObject.visible = true;
-      scene.add(enemyObject);
-
-      const pos= board.position;
-      enemyObject.position.set(pos.x,pos.y+(board.geometry.parameters.height/2),pos.z);
-
-      enemy.enemyObject = enemyObject
-      enemyPlayers.push(enemy);
-    });
-    // Lösch jeden, der grad disconnected
-    mysocket.on("disconnectedPlayer",(enemyData: any )=>{
-      enemyPlayers = enemyPlayers.filter(enemy => enemy.socketId !== enemyData.id);
-    });
-
-    mysocket.on("updatedPlayers",(enemyData: any)=>{
-      enemyPlayers = enemyPlayers.filter(enemy => enemy.socketId !== enemyData.id);
-    });
-
-    // socket.on('init', handleInit);
-    // socket.on('gameState', handleGameState);
-    // socket.on('gameOver', handleGameOver);
-    // socket.on('gameCode', handleGameCode);
-    // socket.on('unknownCode', handleUnknownCode);
-    // socket.on('tooManyPlayers', handleTooManyPlayers);
-  }
-
-
-
   const planeMarker = createPlaneMarker();
 
   scene.add(planeMarker);
 
-  let bremse = 0;
   const renderLoop = (timestamp: number, frame?: XRFrame) => {
     if (renderer.xr.isPresenting) {
       removeHomescreenUI();
@@ -438,13 +326,9 @@ export function createScene(renderer: WebGLRenderer) {
 
 
       }
-      // bremse+=1
-      // if(bremse > 10){
-      //   bremse = 0;
-        updatePlayer();
-      // }
 
-      //checkCollision();
+      updatePlayer();
+      checkCollision();
       renderer.render(scene, camera);
       controls.update();
     }else{
@@ -504,16 +388,7 @@ export function createScene(renderer: WebGLRenderer) {
       isBoardDisplayed = true;
       if(isBoardDisplayed == true) {
         scene.remove(planeMarker);
-        /*let i = 0.01;
-        let startPosition = player.position.y;
-        while (player.position.y < player.position.y + 0.2){
-          player.position.set(player.position.x,player.position.y + i,player.position.z)
-        }
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        let d = 0.01;
-        while (player.position.y > startPosition) {
-          player.position.set(player.position.x, player.position.y - d, player.position.z)
-        }*/
+
       }
 
       //Bestimmt die möglichen X-Koordinaten für die Hindernisse
@@ -532,15 +407,7 @@ export function createScene(renderer: WebGLRenderer) {
 
       isBoardDisplayed = true;
       isGameStarted = true;
-
-      //setInterval(moveObstacles,1000);
     }
-
-      /*    if (crouchButton == true){
-              player.position.set(player.position.x,player.position.y - speed/2,player.position.z)
-            }
-       */
-
   }
 
   const ambientLight = new AmbientLight(0xffffff, 1.0);
@@ -562,7 +429,8 @@ export function createScene(renderer: WebGLRenderer) {
         let firstZ = board.position.z - board.geometry.parameters.depth / 2;
 
         inactiveObjects[randomElementNumber].obstacleMesh.position.set(possibleObstacleXPosition[Math.floor(Math.random()*possibleObstacleXPosition.length)], board.position.y + (board.geometry.parameters.height / 2), firstZ);
-
+        //BB setzen TODO
+        inactiveObjects[randomElementNumber].obstacleBB.copy(<Box3>inactiveObjects[randomElementNumber].obstacleMesh.geometry.boundingBox).applyMatrix4(inactiveObjects[randomElementNumber].obstacleMesh.matrixWorld);
         inactiveObjects[randomElementNumber].obstacleMesh.visible = true;
 
       }
@@ -571,10 +439,14 @@ export function createScene(renderer: WebGLRenderer) {
         activeObjects.forEach(obj => {
           let pos = obj.obstacleMesh.position;
           obj.obstacleMesh.position.set(pos.x, pos.y, pos.z + (speed * 10));
-
+          //BB setzen TODO
+          obj.obstacleBB.copy(<Box3>obj.obstacleMesh.geometry.boundingBox).applyMatrix4(obj.obstacleMesh.matrixWorld);
 
           if (!(pos.z + 0.025 < board.position.z + 0.5)) {
             obj.obstacleMesh.visible = false;
+            //BB -100 setzen TODO
+            obj.obstacleMesh.position.set(-100,-100,-100);
+            obj.obstacleBB.copy(<Box3>obj.obstacleMesh.geometry.boundingBox).applyMatrix4(obj.obstacleMesh.matrixWorld);
           }
         });
       }
@@ -629,12 +501,6 @@ export function createScene(renderer: WebGLRenderer) {
     //braucht man bei keydown listener event
     player.updateMatrixWorld()
 
-    //Update BoundingBox of Player
-    //Müssen wir nachher rüber nehmen
-    if (player.geometry.boundingBox instanceof Box3) {
-      playerBB.copy(player.geometry.boundingBox).applyMatrix4(player.matrixWorld);
-    }
-
     //controls.target.set( mesh.position.x, mesh.position.y, mesh.position.z );
     // reposition camera
     camera.position.sub(controls.target)
@@ -655,18 +521,49 @@ export function createScene(renderer: WebGLRenderer) {
     }
   }
   function checkCollision(){
+
+    //Update BoundingBox of Player
+    //Müssen wir nachher rüber nehmen
+    const playerBB = new Box3(new Vector3(), new Vector3()); //ein Vector for min and one for max
+    playerBB.setFromObject(player);
+    if(playerNumber === 2){
+       //BoundingBox of player
+       playerBB.setFromObject(enemy);
+    }
+
+    if (player.geometry.boundingBox instanceof Box3) { //&& (enemy.geometry.boundingBox instanceof Box3)
+      if(playerNumber === 1){
+      console.log("BB auf Spieler 1")
+
+      playerBB.copy(player.geometry.boundingBox).applyMatrix4(player.matrixWorld);
+      }else{
+       console.log("BB auf Spieler 2")
+        if (enemy.geometry.boundingBox instanceof Box3) {
+          playerBB.copy(enemy.geometry.boundingBox).applyMatrix4(enemy.matrixWorld);
+        }
+      }
+    }
+
+
     //Check for Collision
     let activeObjects = objectPool.filter(obj => obj.obstacleMesh.visible);
-    // let i = 0;
+    let i = 0;
     activeObjects.forEach(obj => {
       //Update BoundingBox of Obstacle
       if (obj.obstacleMesh.geometry.boundingBox instanceof Box3) {
         obj.obstacleBB.copy(obj.obstacleMesh.geometry.boundingBox).applyMatrix4(obj.obstacleMesh.matrixWorld);
       }
-      // objectBBPool.at(i).copy( obj.geometry.boundingBox).applyMatrix4(obj.matrixWorld);
 
       //Check for Collision
       if(obj.obstacleBB.intersectsBox(playerBB)){ //obstacle.obstacleBB
+        console.log("----PlayerBB------")
+        console.log(playerBB)
+        console.log("-------Player-----")
+        console.log(player)
+        console.log("-------Enemy-----")
+        console.log(enemy)
+        console.log("--------Obj----")
+        console.log(obj)
         isGameStarted = false;
         LostGame = true;
         //addGameOverScreenLoser();
@@ -681,7 +578,7 @@ export function createScene(renderer: WebGLRenderer) {
           }
         }
       }
-      // i++;
+      i++;
     });
   }
 
