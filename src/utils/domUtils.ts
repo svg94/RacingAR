@@ -64,6 +64,8 @@ export function addGameOverScreenWinner(){
   // @ts-ignore
   document.getElementById("StartGameMultiplayer").style.visibility = 'hidden';
   // @ts-ignore
+  document.getElementById("StartUnfinishedGame").style.visibility = 'hidden';
+  // @ts-ignore
   document.getElementById("GameOverScreenUI").style.display = 'block';
   // @ts-ignore
   document.getElementById("LoseButton").style.visibility = 'hidden';
@@ -102,6 +104,8 @@ export function addGameOverScreenLoser(){
   // @ts-ignore
   document.getElementById("StartGameMultiplayer").style.visibility = 'hidden';
   // @ts-ignore
+  document.getElementById("StartUnfinishedGame").style.visibility = 'hidden';
+  // @ts-ignore
   document.getElementById("GameOverScreenUI").style.display = 'block';
   // @ts-ignore
   document.getElementById("WinnerForm").style.display = 'none';
@@ -124,6 +128,8 @@ export function displayWaitingScreenUIP1(){
   // @ts-ignore
   document.getElementById("JoinRoomUI").style.display = 'none';
   // @ts-ignore
+  document.getElementById("UnfinishedGame").style.display = 'none';
+  // @ts-ignore
   document.getElementById("LastSave").style.display = 'none';
 }
 
@@ -134,6 +140,8 @@ export function displayWaitingScreenUIP2(){
   document.getElementById("WaitingMessage").innerText = "Connected to a Room. Press ARButton when ready to start the Game!"
   // @ts-ignore
   document.getElementById("roomCreation").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("UnfinishedGame").style.display = 'none';
   // @ts-ignore
   document.getElementById("LastSave").style.display = 'none';
 }
@@ -148,6 +156,8 @@ export function removeHomescreenUI(){
     document.getElementById("BackHome").style.visibility = 'visible';
     //@ts-ignore
     document.getElementById("StartGameMultiplayer").style.display = 'block';
+    // @ts-ignore
+    document.getElementById("StartUnfinishedGame").style.display = 'block';
   }
 }
 
@@ -164,6 +174,8 @@ export function displayHomescreenUI(){
   document.getElementById("WaitingUI").style.display = 'none';
   // @ts-ignore
   document.getElementById("StartGameMultiplayer").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("StartUnfinishedGame").style.display = 'none';
 }
 
 

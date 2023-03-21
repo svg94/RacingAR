@@ -14,8 +14,8 @@
     pointer-events: auto;
     display: block;
     position: absolute;
-    bottom: 0;
-    left: 0;
+    bottom: 100px !important;
+    left: 100px !important;
     background-color: transparent;
     width: 120px;
     height: 120px;
@@ -28,8 +28,8 @@
     pointer-events: auto;
     display: block;
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 100px !important;
+    right: 100px !important;
     left: auto;
     background-color: transparent;
     width: 50vw;
