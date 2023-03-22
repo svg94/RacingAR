@@ -146,6 +146,22 @@ export function displayWaitingScreenUIP2(){
   document.getElementById("LastSave").style.display = 'none';
 }
 
+export function displayWaitingScreenUIUnfinishedGame(){
+  //@ts-ignore
+  document.getElementById("WaitingUI").style.display = 'block';
+  //@ts-ignore
+  document.getElementById("WaitingMessage").innerText = "Wait for other Player to enter Game Code. After that press ARButton down below!"
+  // @ts-ignore
+  document.getElementById("JoinRoomUI").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("UnfinishedGame").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("LastSave").style.display = 'none';
+  // @ts-ignore
+  document.getElementById("NewGamecodeButton").style.display = 'none';
+}
+
+
 export function removeHomescreenUI(){
   // @ts-ignore
   document.getElementById("HomescreenUI").style.display = 'none';

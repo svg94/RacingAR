@@ -23,7 +23,7 @@ import {Obstacle} from "./interfaces/IObstacle";
 import {
   addGameOverScreenLoser,
   addGameOverScreenWinner,
-  displayHomescreenUI, displayWaitingScreenUIP1, displayWaitingScreenUIP2,
+  displayHomescreenUI, displayWaitingScreenUIP1, displayWaitingScreenUIP2, displayWaitingScreenUIUnfinishedGame,
   removeHomescreenUI
 } from "./utils/domUtils";
 //import {removeHomescreenUI} from "./utils/domUtils";
@@ -148,12 +148,17 @@ export function createScene(renderer: WebGLRenderer) {
   mysocket.on("DisplayPlayers", displayPlayers);
   mysocket.on("playerNumber", handlePlayerNumber);
   mysocket.on('gameState', handleGameState);
+
   // @ts-ignore
   document.getElementById('NewGamecodeButton').addEventListener('click', newGame);
   // @ts-ignore
   document.getElementById('JoinRoomButton').addEventListener('click', joinGame);
   // @ts-ignore
   document.getElementById('StartGameMultiplayer').addEventListener('click', startGame);
+  // @ts-ignore
+  document.getElementById('LastSave').addEventListener('click', loadUnfinishedGame);
+  // @ts-ignore
+  document.getElementById('StartUnfinishedGame').addEventListener('click', startUnfinishedGame);
 
   let connectedSocket = false;
 
@@ -247,6 +252,25 @@ export function createScene(renderer: WebGLRenderer) {
     mysocket.emit("startAR", gameCode);
   }
 
+  function loadUnfinishedGame(){
+    // @ts-ignore
+    let gamecodeUnfinished = document.getElementById("GamecodeUnfinishedGame").value;
+    gameCode = gamecodeUnfinished;
+    // @ts-ignore
+    let playernumberUnfinished = document.getElementById("PlayerNumberUnfinished").value;
+    playerNumber = playernumberUnfinished;
+    mysocket.emit("LoadUnfinishedGame",gamecodeUnfinished,playernumberUnfinished)
+    displayWaitingScreenUIUnfinishedGame();
+  }
+
+  function startUnfinishedGame(){
+    isGameStarted = true;
+    renderer.setAnimationLoop(renderLoop);
+    mysocket.emit("startUnfinishedGame",gameCode);
+  }
+
+
+
   function showTestBox(coords: any){
     // console.log("SHOW TEST BOX")
     // let boxX = possibleObstacleXPosition[coords.x];
@@ -338,15 +362,15 @@ export function createScene(renderer: WebGLRenderer) {
 
 
       }
-
+      updatePlayer();
       if(isGameStarted){
-        updatePlayer();
+
         checkCollision();
       }
       renderer.render(scene, camera);
       controls.update();
     }else{
-
+      //mysocket.emit("keydown", {});
     }
   }
 
