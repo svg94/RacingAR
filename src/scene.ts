@@ -258,14 +258,14 @@ export function createScene(renderer: WebGLRenderer) {
     gameCode = gamecodeUnfinished;
     // @ts-ignore
     let playernumberUnfinished = document.getElementById("PlayerNumberUnfinished").value;
-    playerNumber = playernumberUnfinished;
-    mysocket.emit("LoadUnfinishedGame",gamecodeUnfinished,playernumberUnfinished)
+    playerNumber = Number(playernumberUnfinished);
+    mysocket.emit("LoadUnfinishedGame",gamecodeUnfinished,playerNumber)
     displayWaitingScreenUIUnfinishedGame();
   }
 
   function startUnfinishedGame(){
     isGameStarted = true;
-    renderer.setAnimationLoop(renderLoop);
+    // renderer.setAnimationLoop(renderLoop);
     mysocket.emit("startUnfinishedGame",gameCode);
   }
 
@@ -362,9 +362,9 @@ export function createScene(renderer: WebGLRenderer) {
 
 
       }
-      updatePlayer();
-      if(isGameStarted){
 
+      if(isGameStarted){
+        updatePlayer();
         checkCollision();
       }
       renderer.render(scene, camera);
@@ -495,6 +495,8 @@ export function createScene(renderer: WebGLRenderer) {
   function updatePlayer(){
     let position = player.position;
     if(playerNumber === 2){
+      console.log("PLAYER NUMBER");
+      console.log(playerNumber);
       position = enemy.position;
     }
     // move the player
